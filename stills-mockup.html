@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stills Mockup</title>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #13161f; color: #e2e8f0; padding: 32px; }
+  h2 { font-size: 11px; letter-spacing: 1.4px; color: #4a5068; text-transform: uppercase; margin-bottom: 16px; }
+  p.note { color: #6b7280; font-size: 12px; margin-bottom: 28px; }
+
+  .card {
+    background: #1f2236; border: 1px solid #2c3050; border-radius: 12px;
+    overflow: hidden; margin-bottom: 16px;
+  }
+
+  /* Stills strip */
+  .stills {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    height: 160px;
+  }
+  .stills img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: brightness(0.88);
+    transition: filter 0.2s;
+  }
+  .stills img:hover { filter: brightness(1); }
+
+  /* Card body */
+  .body {
+    display: flex; align-items: flex-start; gap: 0; padding: 14px 16px;
+  }
+  .rank { width: 28px; font-size: 11px; font-weight: 800; color: #4a5068; flex-shrink: 0; padding-top: 2px; }
+  .info { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+  .title { font-size: 15px; font-weight: 700; }
+  .meta { font-size: 11px; color: #8b92a5; display: flex; align-items: center; gap: 8px; }
+  .svc { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 4px; color: #fff; text-transform: uppercase; }
+  .themes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 10px; color: #8b92a5; background: rgba(255,255,255,0.05); border: 1px solid #2c3050; padding: 2px 8px; border-radius: 20px; }
+  .writeup { font-size: 12px; color: #8b92a5; line-height: 1.6; }
+  .writeup em { color: #e2e8f0; font-style: normal; font-weight: 600; }
+  .match-block { text-align: right; flex-shrink: 0; padding-left: 16px; }
+  .pct { font-size: 28px; font-weight: 800; color: #22c55e; line-height: 1; }
+  .pct-label { font-size: 9px; font-weight: 600; letter-spacing: 0.8px; color: #4a5068; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<h2>Stills Mockup — Rough Concept</h2>
+<p class="note">Showing 3 backdrops per film as a filmstrip at the top of each card. Images pulled from TMDB.</p>
+
+<!-- Card 1: Hereditary -->
+<div class="card">
+  <div class="stills" id="stills-1">
+    <div style="background:#1a1a2e;height:100%;display:flex;align-items:center;justify-content:center;color:#4a5068;font-size:11px;">loading…</div>
+    <div style="background:#1a1a2e;height:100%;"></div>
+    <div style="background:#1a1a2e;height:100%;"></div>
+  </div>
+  <div class="body">
+    <div class="rank">1</div>
+    <div class="info">
+      <div class="title">Hereditary</div>
+      <div class="meta">
+        2018 · 127 min
+        <span class="svc" style="background:#e50914">Netflix</span>
+      </div>
+      <div class="themes">
+        <span class="tag">creeping dread</span>
+        <span class="tag">maternal horror</span>
+        <span class="tag">psychological unraveling</span>
+      </div>
+      <div class="writeup">
+        If you loved <em>Nosferatu</em> for its slow-build atmospheric dread that pays off completely,
+        Hereditary hits that same nerve — but grounds the horror entirely in grief and family trauma.
+        It's been on your watchlist — this might be the night.
+      </div>
+    </div>
+    <div class="match-block">
+      <div class="pct">96%</div>
+      <div class="pct-label">MATCH</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 2: The Lighthouse -->
+<div class="card">
+  <div class="stills" id="stills-2">
+    <div style="background:#1a1a2e;height:100%;display:flex;align-items:center;justify-content:center;color:#4a5068;font-size:11px;">loading…</div>
+    <div style="background:#1a1a2e;height:100%;"></div>
+    <div style="background:#1a1a2e;height:100%;"></div>
+  </div>
+  <div class="body">
+    <div class="rank">2</div>
+    <div class="info">
+      <div class="title">The Lighthouse</div>
+      <div class="meta">
+        2019 · 109 min
+        <span class="svc" style="background:#333">Apple TV+</span>
+      </div>
+      <div class="themes">
+        <span class="tag">descent into madness</span>
+        <span class="tag">mythic isolation</span>
+        <span class="tag">claustrophobic tension</span>
+      </div>
+      <div class="writeup">
+        For something that'll stick in your head for days: The Lighthouse is Pattinson and Dafoe
+        at career-best, shot in stark black and white on an almost square aspect ratio.
+        The kind of film where every frame feels intentional — exactly what you praised about <em>Decision to Leave</em>.
+      </div>
+    </div>
+    <div class="match-block">
+      <div class="pct" style="color:#84cc16">91%</div>
+      <div class="pct-label">MATCH</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 3: Prisoners -->
+<div class="card">
+  <div class="stills" id="stills-3">
+    <div style="background:#1a1a2e;height:100%;display:flex;align-items:center;justify-content:center;color:#4a5068;font-size:11px;">loading…</div>
+    <div style="background:#1a1a2e;height:100%;"></div>
+    <div style="background:#1a1a2e;height:100%;"></div>
+  </div>
+  <div class="body">
+    <div class="rank">3</div>
+    <div class="info">
+      <div class="title">Prisoners</div>
+      <div class="meta">
+        2013 · 153 min
+        <span class="svc" style="background:#00a8e1">Prime</span>
+      </div>
+      <div class="themes">
+        <span class="tag">moral ambiguity</span>
+        <span class="tag">desperate urgency</span>
+        <span class="tag">paranoid atmosphere</span>
+      </div>
+      <div class="writeup">
+        Villeneuve before <em>Dune</em> — same obsessive craft, same commitment to making you feel every
+        minute of tension. If you loved <em>Knives Out</em> for its sharp plotting and satisfying reveals,
+        Prisoners operates in similar mystery territory but pushes much darker and harder.
+      </div>
+    </div>
+    <div class="match-block">
+      <div class="pct" style="color:#84cc16">89%</div>
+      <div class="pct-label">MATCH</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwN2U3ODEyODJkNzFjODAzYjI4MDAzNGVlZDJiMGU3MCIsIm5iZiI6MTc3NjYzNTE4NS4yOSwic3ViIjoiNjllNTRkMzE3MzM3MWU3NTFmODRmMzJmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.dP4f3I8FGzsnYz3LFAw1Xb-NoKN2O5734Wp9wUUPgp8';
+const IMG = 'https://image.tmdb.org/t/p/w780';
+
+// Hereditary=493922, The Lighthouse=503919, Prisoners=146233
+const MOVIES = [
+  { id: 493922, el: 'stills-1' },
+  { id: 503919, el: 'stills-2' },
+  { id: 146233, el: 'stills-3' },
+];
+
+async function loadStills(movieId, elId) {
+  const r = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/images`, {
+    headers: { Authorization: `Bearer ${TOKEN}` }
+  });
+  const data = await r.json();
+  const backdrops = (data.backdrops || []).slice(0, 3);
+  const el = document.getElementById(elId);
+  if (backdrops.length) {
+    el.innerHTML = backdrops.map(b =>
+      `<img src="${IMG}${b.file_path}" alt="" loading="lazy">`
+    ).join('');
+  }
+}
+
+MOVIES.forEach(m => loadStills(m.id, m.el));
+</script>
+</body>
+</html>

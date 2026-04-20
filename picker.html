@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Movie Picker">
+<meta name="theme-color" content="#13161f">
+<title>Eric's Movie Picker</title>
+<style>
+:root {
+  --bg: #13161f; --panel: #1b1e2d; --card: #1f2236; --card2: #252843;
+  --border: #2c3050; --accent: #4f78f1; --text: #e2e8f0;
+  --sub: #8b92a5; --muted: #4a5068; --green: #22c55e; --lime: #84cc16; --amber: #f59e0b; --orange: #f97316;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── App bar (mobile top) ── */
+.app-bar {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+}
+.app-bar-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 0;
+}
+.logo { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+.logo-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+.watchlist-btn {
+  font-size: 12px; font-weight: 700; color: var(--accent);
+  background: rgba(79,120,241,0.12); border: 1px solid rgba(79,120,241,0.3);
+  padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+  transition: background 0.15s, border-color 0.15s; white-space: nowrap;
+}
+.watchlist-btn:hover { background: rgba(79,120,241,0.22); border-color: var(--accent); }
+.sidebar-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  font-size: 10px; font-weight: 700; letter-spacing: 1.3px; color: var(--muted); text-transform: uppercase;
+  background: none; border: none; border-bottom: 1px solid var(--border);
+  width: 100%; cursor: pointer; background: var(--panel);
+}
+.sidebar-hd .arr { font-size: 14px; transition: transform 0.2s; }
+.sidebar.collapsed .arr { transform: rotate(-90deg); }
+.sidebar-body { overflow: hidden; max-height: 900px; transition: max-height 0.3s ease; }
+.sidebar.collapsed .sidebar-body { max-height: 0; }
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px);
+  background: #22c55e; color: #fff; padding: 10px 18px; border-radius: 20px;
+  font-size: 13px; font-weight: 600; z-index: 1000; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s, transform 0.2s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.tab-nav { display: flex; padding: 10px 16px 0; gap: 0; }
+.tab-btn {
+  flex: 1; padding: 8px 4px; font-size: 13px; font-weight: 600; color: var(--muted);
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Layout shell ── */
+.tab-content { display: none; }
+.tab-content.active { display: flex; flex-direction: column; }
+
+/* ── Sidebar / filter panel ── */
+.sidebar { background: var(--panel); border-bottom: 1px solid var(--border); }
+.sidebar-inner { padding: 18px 16px; display: flex; flex-direction: column; gap: 18px; }
+
+/* ── Filters shared ── */
+.filter-block { display: flex; flex-direction: column; gap: 9px; }
+.filter-label { font-size: 10px; font-weight: 700; letter-spacing: 1.3px; color: var(--muted); text-transform: uppercase; }
+.pills { display: flex; flex-wrap: wrap; gap: 7px; }
+.mood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pill {
+  padding: 7px 13px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card); color: var(--sub); cursor: pointer; font-size: 13px; font-weight: 500;
+  transition: all 0.15s; white-space: nowrap; text-align: center;
+}
+.pill:hover { border-color: var(--accent); color: var(--text); }
+.pill.on { background: rgba(79,120,241,0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.mood-pill {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 14px 8px; gap: 6px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card); color: var(--sub); cursor: pointer;
+  transition: all 0.15s; font-size: 12px; font-weight: 500; text-align: center; line-height: 1.2;
+}
+.mood-pill:hover { border-color: var(--accent); color: var(--text); }
+.mood-pill.on { background: rgba(79,120,241,0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.mood-pill .pill-emoji { font-size: 22px; line-height: 1; }
+.query-box {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 14px; padding: 10px 12px;
+  resize: vertical; min-height: 68px; font-family: inherit; line-height: 1.5; transition: border-color 0.15s;
+}
+.query-box::placeholder { color: var(--muted); }
+.query-box:focus { outline: none; border-color: var(--accent); }
+.btn-find {
+  padding: 13px; background: var(--accent); border: none; border-radius: 8px;
+  color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.15s;
+}
+.btn-find:active { background: #3b63de; transform: scale(0.98); }
+.btn-find.loading { opacity: 0.6; pointer-events: none; }
+.services-note { font-size: 11px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 14px; }
+.services-note strong { color: var(--sub); }
+
+/* ── Main results area ── */
+.main { padding: 18px 16px; }
+.status-msg { font-size: 13px; color: var(--sub); margin-bottom: 14px; min-height: 18px; }
+.section-hd { margin-bottom: 12px; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: 1.4px; color: var(--muted); text-transform: uppercase; }
+.section-sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+section { margin-bottom: 30px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+/* ── Movie card ── */
+.rec-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.card-body { display: flex; overflow: hidden; }
+.rec-rank {
+  display: none; width: 34px; min-width: 34px; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: var(--muted); background: var(--panel); border-right: 1px solid var(--border);
+}
+.rec-poster-wrap { position: relative; flex-shrink: 0; }
+.rec-poster { width: 76px; height: 114px; object-fit: cover; display: block; background: var(--panel); }
+.rec-no-poster { width: 76px; height: 114px; background: var(--panel); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--muted); }
+.watchlist-tag {
+  position: absolute; bottom: 5px; left: 5px; background: rgba(79,120,241,0.9); color: #fff;
+  font-size: 7px; font-weight: 800; padding: 2px 5px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.rec-info { flex: 1; padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rec-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.rec-title-block { flex: 1; min-width: 0; }
+.rec-num { font-size: 9px; font-weight: 800; color: var(--muted); margin-bottom: 2px; letter-spacing: 0.5px; }
+.rec-title { font-size: 14px; font-weight: 700; line-height: 1.25; }
+.rec-meta { font-size: 11px; color: var(--sub); margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.stream-pill { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; color: #fff; text-transform: uppercase; letter-spacing: 0.3px; }
+.rec-match-block { text-align: right; flex-shrink: 0; }
+.rec-match { font-size: 22px; font-weight: 800; line-height: 1; }
+.match-label { font-size: 8px; font-weight: 600; letter-spacing: 0.8px; color: var(--muted); }
+.rec-themes { display: flex; flex-wrap: wrap; gap: 5px; }
+.theme-tag { font-size: 10px; color: var(--sub); background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px; }
+.rec-writeup { font-size: 12px; color: var(--sub); line-height: 1.6; }
+.rec-writeup em { color: var(--text); font-style: normal; font-weight: 600; }
+
+/* skeleton card */
+.skel-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; height: 240px; margin-bottom: 12px; overflow: hidden; }
+.skel-inner { height: 100%; background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%); background-size: 400% 100%; animation: shimmer 1.8s infinite; }
+@keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+.empty-msg { color: var(--muted); font-size: 13px; padding: 28px 0; text-align: center; }
+
+/* ── Tab 2: Based On ── */
+.match-sidebar { display: none; }
+.match-top { padding: 20px 16px 0; }
+.match-top h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.match-top p { font-size: 12px; color: var(--sub); margin-bottom: 18px; }
+.seed-boxes { display: flex; gap: 12px; margin-bottom: 18px; }
+.seed-box {
+  flex: 1; aspect-ratio: 2/3; border-radius: 10px; border: 2px dashed var(--border);
+  background: var(--card); display: flex; flex-direction: column; align-items: center;
+  justify-content: center; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  position: relative; overflow: hidden; min-width: 0;
+}
+.seed-box:hover { border-color: var(--accent); background: var(--card2); }
+.seed-box.filled { border-style: solid; border-color: var(--border); cursor: default; }
+.seed-box .plus { font-size: 28px; color: var(--muted); line-height: 1; }
+.seed-box .add-label { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 500; }
+.seed-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.seed-box .remove-btn {
+  position: absolute; top: 6px; right: 6px; width: 22px; height: 22px;
+  background: rgba(0,0,0,0.75); border: none; border-radius: 50%; color: #fff;
+  font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+  line-height: 1;
+}
+.seed-title-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.85));
+  padding: 20px 7px 7px; font-size: 10px; font-weight: 700; color: #fff; text-align: center;
+  line-height: 1.2;
+}
+.match-find-btn { width: 100%; }
+
+/* ── Search overlay ── */
+.search-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.7); align-items: flex-start; justify-content: center;
+  padding: 60px 16px 16px;
+}
+.search-overlay.open { display: flex; }
+.search-panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  width: 100%; max-width: 420px; overflow: hidden;
+}
+.search-header { display: flex; align-items: center; gap: 10px; padding: 14px 14px 0; }
+.search-input {
+  flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-size: 15px; padding: 9px 12px; font-family: inherit;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+.search-close { background: none; border: none; color: var(--sub); font-size: 22px; cursor: pointer; padding: 4px; line-height: 1; }
+.search-results { max-height: 340px; overflow-y: auto; padding: 10px; }
+.search-result {
+  display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px;
+  cursor: pointer; transition: background 0.12s;
+}
+.search-result:hover { background: var(--card2); }
+.search-result img { width: 36px; height: 54px; object-fit: cover; border-radius: 4px; background: var(--card2); flex-shrink: 0; }
+.search-result-info { flex: 1; min-width: 0; }
+.search-result-title { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.search-result-year { font-size: 11px; color: var(--sub); margin-top: 2px; }
+.search-placeholder { color: var(--muted); font-size: 13px; text-align: center; padding: 24px; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── Desktop (≥769px) ── */
+@media (min-width: 769px) {
+  .app-bar-top { padding: 16px 24px 0; }
+  .tab-nav { padding: 10px 24px 0; }
+  .tab-btn { flex: none; padding: 8px 20px; font-size: 13px; }
+
+  /* Tab 1 desktop: sidebar + main side by side */
+  #tab-mood { flex-direction: row; height: calc(100vh - 72px); overflow: hidden; }
+  .sidebar {
+    width: 272px; min-width: 272px;
+    border-bottom: none; border-right: 1px solid var(--border);
+    height: 100%; overflow-y: auto;
+  }
+  .sidebar-hd { display: none; }
+  .sidebar-body { max-height: none !important; overflow: visible; }
+  .sidebar-inner { padding: 22px 20px; gap: 22px; }
+  .watchlist-btn { display: none; }
+  .main { flex: 1; padding: 24px 28px; overflow-y: auto; height: 100%; }
+
+  /* Tab 2 desktop: sidebar + main */
+  #tab-match { flex-direction: row; height: calc(100vh - 72px); overflow: hidden; }
+  .match-sidebar {
+    width: 272px; min-width: 272px; background: var(--panel);
+    border-right: 1px solid var(--border); padding: 22px 20px;
+    display: flex; flex-direction: column; gap: 18px;
+    height: 100%; overflow-y: auto;
+  }
+  .match-top { display: none; }
+  .match-main { flex: 1; padding: 24px 28px; overflow-y: auto; height: 100%; }
+  .seed-boxes { flex-direction: column; gap: 0; margin: 0; }
+  .seed-box { aspect-ratio: auto; height: 0; padding-bottom: 30%; flex: none; width: 100%; margin-bottom: 12px; }
+  .seed-box:last-child { margin-bottom: 0; }
+
+  /* Bigger cards */
+  .rec-card:hover { border-color: #3d4870; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .rec-rank { display: flex; }
+  .rec-num { display: none; }
+  .rec-poster { width: 88px; height: 132px; }
+  .rec-no-poster { width: 88px; height: 132px; font-size: 28px; }
+  .rec-info { padding: 13px 16px; }
+  .rec-title { font-size: 15px; }
+  .rec-match { font-size: 26px; }
+  .skel-card { height: 280px; }
+}
+</style>
+</head>
+<body>
+
+<!-- App bar -->
+<div class="app-bar">
+  <div class="app-bar-top">
+    <div class="logo"><div class="logo-dot"></div>Eric's Movie Picker</div>
+    <button class="watchlist-btn" id="watchlist-btn">+ Watchlist</button>
+  </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="mood">Mood &amp; Vibe</button>
+    <button class="tab-btn" data-tab="match">Similar To</button>
+  </div>
+</div>
+
+<!-- TAB 1: Mood & Vibe -->
+<div class="tab-content active" id="tab-mood">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-hd" id="sidebar-toggle">Filters <span class="arr">▾</span></button>
+    <div class="sidebar-body" id="sidebar-body">
+    <div class="sidebar-inner">
+      <div class="filter-block">
+        <div class="filter-label">Mood</div>
+        <div class="mood-grid" id="mood-pills">
+          <button class="mood-pill" data-mood="fun"><span class="pill-emoji">😄</span>Fun &amp; Light</button>
+          <button class="mood-pill" data-mood="intense"><span class="pill-emoji">😤</span>Intense &amp; Gripping</button>
+          <button class="mood-pill" data-mood="mind"><span class="pill-emoji">🌀</span>Mind-Bending</button>
+          <button class="mood-pill" data-mood="emotional"><span class="pill-emoji">💔</span>Emotional</button>
+          <button class="mood-pill" data-mood="action"><span class="pill-emoji">⚡</span>Action-Packed</button>
+          <button class="mood-pill" data-mood="arthouse"><span class="pill-emoji">🎨</span>Arthouse</button>
+          <button class="mood-pill" data-mood="epic"><span class="pill-emoji">🏔️</span>Epic</button>
+          <button class="mood-pill" data-mood="scifi"><span class="pill-emoji">🚀</span>Sci-Fi</button>
+        </div>
+      </div>
+      <div class="filter-block">
+        <div class="filter-label">Runtime</div>
+        <div class="pills" id="runtime-pills">
+          <button class="pill" data-rt="short">⏱ 90 minutes</button>
+          <button class="pill" data-rt="medium">🎬 Under 2 hours</button>
+        </div>
+      </div>
+      <div class="filter-block">
+        <div class="filter-label">Anything Else?</div>
+        <textarea class="query-box" id="query-text" placeholder="e.g. strong female lead, set in the past, slow burn thriller…"></textarea>
+      </div>
+      <button class="btn-find" id="find-btn">Find My Movie</button>
+      <div class="services-note">
+        <strong>Your streaming:</strong> Netflix · Disney+ · Max · Hulu · Prime (included) · Apple TV+ · Peacock<br><br>
+        Top 5 from your services. Discover section includes everything.
+      </div>
+    </div>
+    </div><!-- /sidebar-body -->
+  </aside>
+
+  <div class="main">
+    <div class="status-msg" id="status-1">Loading your watchlist…</div>
+    <section>
+      <div class="section-hd">
+        <div class="section-title">Top Picks For You</div>
+        <div class="section-sub">On your streaming services · matched to your taste</div>
+      </div>
+      <div id="stream-picks"></div>
+    </section>
+    <hr class="divider">
+    <section>
+      <div class="section-hd">
+        <div class="section-title">Discover Beyond Your Watchlist</div>
+        <div class="section-sub">From anywhere — streaming, rental, or otherwise</div>
+      </div>
+      <div id="disc-picks"></div>
+    </section>
+  </div>
+</div>
+
+<!-- TAB 2: Based On -->
+<div class="tab-content" id="tab-match">
+  <!-- Mobile top section -->
+  <div class="match-top">
+    <h2>Pick up to 3 movies</h2>
+    <p>We'll find your next watch based on what you love about these.</p>
+    <div class="seed-boxes" id="seed-boxes-mobile">
+      <div class="seed-box" id="seed-m-0" data-slot="0"><span class="plus">+</span><span class="add-label">Add Movie</span></div>
+      <div class="seed-box" id="seed-m-1" data-slot="1"><span class="plus">+</span><span class="add-label">Add Movie</span></div>
+      <div class="seed-box" id="seed-m-2" data-slot="2"><span class="plus">+</span><span class="add-label">Add Movie</span></div>
+    </div>
+    <div class="filter-block" style="margin-bottom:14px">
+      <div class="filter-label">Anything Else?</div>
+      <textarea class="query-box" id="match-query-mobile" placeholder="e.g. female director, set in Japan, slow burn…"></textarea>
+    </div>
+    <button class="btn-find match-find-btn" id="match-find-mobile">Find My Movie</button>
+  </div>
+
+  <!-- Desktop sidebar -->
+  <div class="match-sidebar" id="match-sidebar">
+    <div class="filter-label">Pick up to 3 movies</div>
+    <p style="font-size:12px;color:var(--sub);margin-top:-10px">We'll find your next watch based on what you love about these.</p>
+    <div class="seed-boxes" id="seed-boxes-desktop">
+      <div class="seed-box" id="seed-d-0" data-slot="0"><span class="plus">+</span><span class="add-label">Add</span></div>
+      <div class="seed-box" id="seed-d-1" data-slot="1"><span class="plus">+</span><span class="add-label">Add</span></div>
+      <div class="seed-box" id="seed-d-2" data-slot="2"><span class="plus">+</span><span class="add-label">Add</span></div>
+    </div>
+    <div class="filter-block">
+      <div class="filter-label">Anything Else?</div>
+      <textarea class="query-box" id="match-query-desktop" placeholder="e.g. female director, set in Japan, slow burn…"></textarea>
+    </div>
+    <button class="btn-find" id="match-find-desktop">Find My Movie</button>
+    <div class="services-note">
+      <strong>Your streaming:</strong> Netflix · Disney+ · Max · Hulu · Prime · Apple TV+ · Peacock<br><br>
+      Top 5 from your services. Discover section includes everything.
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="main match-main">
+    <div class="status-msg" id="status-2"></div>
+    <section>
+      <div class="section-hd">
+        <div class="section-title">Top Picks For You</div>
+        <div class="section-sub">On your streaming services · based on your selections</div>
+      </div>
+      <div id="match-stream-picks"><div class="empty-msg">Select a movie above to get started</div></div>
+    </section>
+    <hr class="divider">
+    <section>
+      <div class="section-hd">
+        <div class="section-title">Discover Beyond Your Watchlist</div>
+        <div class="section-sub">From anywhere — streaming, rental, or otherwise</div>
+      </div>
+      <div id="match-disc-picks"></div>
+    </section>
+  </div>
+</div>
+
+<!-- Search overlay -->
+<div class="search-overlay" id="search-overlay">
+  <div class="search-panel">
+    <div class="search-header">
+      <input class="search-input" id="search-input" type="text" placeholder="Search for a movie…" autocomplete="off">
+      <button class="search-close" id="search-close">✕</button>
+    </div>
+    <div class="search-results" id="search-results">
+      <div class="search-placeholder">Start typing to search…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwN2U3ODEyODJkNzFjODAzYjI4MDAzNGVlZDJiMGU3MCIsIm5iZiI6MTc3NjYzNTE4NS4yOSwic3ViIjoiNjllNTRkMzE3MzM3MWU3NTFmODRmMzJmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.dP4f3I8FGzsnYz3LFAw1Xb-NoKN2O5734Wp9wUUPgp8';
+const API='https://api.themoviedb.org/3';
+const POSTER='https://image.tmdb.org/t/p/w185';
+const STILL='https://image.tmdb.org/t/p/w780';
+
+const MY_SERVICES=new Set([8,337,1899,15,9,350,386]);
+const SVC_META={8:{name:'Netflix',bg:'#e50914'},337:{name:'Disney+',bg:'#0b3d91'},1899:{name:'Max',bg:'#5822b4'},15:{name:'Hulu',bg:'#1ce783',color:'#000'},9:{name:'Prime',bg:'#00a8e1'},350:{name:'Apple TV+',bg:'#333'},386:{name:'Peacock',bg:'#e47b00'},531:{name:'Paramount+',bg:'#0064ff'}};
+const MOOD_GENRES={fun:[35,12,10751,10402],intense:[53,80,18,10752],mind:[878,9648,14,53],emotional:[18,10749,10402,99],action:[28,12,10752],arthouse:[18,36,99,9648],epic:[28,12,36,10752,878,14],scifi:[878,14,53,9648]};
+const ERIC_W={18:1.18,53:1.15,80:1.12,878:1.12,9648:1.1,10402:1.1,10749:1.08,35:1.05,14:1.07,27:1.0,16:1.02,28:0.94,12:0.96};
+const THEME_OPTS={28:['kinetic momentum','physical stakes','propulsive tension'],12:['grand adventure','mythic scale','sense of wonder'],16:['visual imagination','timeless storytelling','artistic vision'],35:['sharp wit','comic chemistry','genuine laughs'],80:['moral ambiguity','criminal psychology','gritty realism'],99:['raw human truth','investigative depth','real-world stakes'],18:['quiet devastation','character study','emotional weight'],14:['otherworldly wonder','dark mythology','magical realism'],27:['creeping dread','psychological terror','atmospheric horror'],10402:['soul in the music','rhythmic storytelling','emotional catharsis'],9648:['buried secrets','paranoid atmosphere','unraveling mystery'],10749:['forbidden longing','romantic tension','emotional intimacy'],878:['conceptual boldness','future dread','existential scale'],53:['mounting paranoia','cat-and-mouse','psychological warfare'],10752:['cost of war','raw heroism','moral reckoning'],36:['epic history','human legacy','historical weight']};
+const COMPS={53:{film:'Knives Out',trait:'sharp plotting and satisfying reveals'},80:{film:'Parasite',trait:'social tension wrapped in precise genre craft'},878:{film:'Blade Runner 2049',trait:'immersive world-building and philosophical weight'},18:{film:'The Social Network',trait:'razor-sharp writing and compelling character study'},27:{film:'Nosferatu',trait:'slow-build atmospheric dread that pays off completely'},10749:{film:'Before Sunset',trait:'quiet intimacy that hits harder than any explosion'},35:{film:'Booksmart',trait:'wit and characters you genuinely root for'},10402:{film:'La La Land',trait:'music that makes the emotions hit harder than dialogue alone'},14:{film:"Pan's Labyrinth",trait:'dark fantasy that says something real about being human'},28:{film:'Mad Max: Fury Road',trait:'kinetic action with actual ideas behind it'},16:{film:'Spider-Man: Across the Spider-Verse',trait:'visual ambition matched by emotional storytelling'},12:{film:'Raiders of the Lost Ark',trait:'pure adventure that never loses its sense of fun'},9648:{film:'The Grand Budapest Hotel',trait:'clever plotting wrapped in a beautifully distinctive world'}};
+
+const FILM_DB={
+'Drive My Car':'Hamaguchi gives you three hours and uses every minute — a widowed director rehearsing Chekhov while circling grief he keeps mistaking for acceptance. Slow in the way that only pays off if you commit.',
+'Aftersun':'Wells hides what the film is actually about until you\'re already undone. Paul Mescal and a child on a Turkish holiday — what looks like a home video becomes something much harder.',
+'The Fabelmans':'Spielberg making a film about becoming Spielberg — more honest and more painful than it sounds. The scene with John Ford at the end is the whole movie.',
+'Chungking Express':'Wong Kar-wai shot this in six weeks between other projects and made something that feels like falling in love in a city you don\'t know. Two stories that shouldn\'t belong together and do.',
+'Malignant':'James Wan went full exploitation and the back half is genuinely unhinged in the best way. Do not look anything up.',
+'Hereditary':'Ari Aster builds dread the way grief actually works — numbing first, then devastating. Toni Collette is doing something most actors couldn\'t pull off.',
+'The Place Beyond the Pines':'A triptych where each section undermines the one before it — Gosling is barely in it, and that\'s the point. A film about what fathers pass down without meaning to.',
+'Weathering with You':'Shinkai\'s most romantically reckless film — a boy and a girl and a flooded Tokyo, and the film asks if love is worth it even when the answer hurts everyone else.',
+'Barry Lyndon':'Kubrick used NASA lenses to shoot by candlelight and made an 18th-century picaresque that\'s also a cold-blooded study of a man who gets everything he wants and loses it all anyway.',
+'Mandy':'Nicolas Cage in the woods, a demon biker gang, a chainsaw duel. Panos Cosmatos shoots it like a blacklit nightmare and it earns every insane minute.',
+'Suzume':'Shinkai made a road movie disguised as a disaster film. The grief underneath it hits harder for being mostly unspoken.',
+"Kiki's Delivery Service":'Miyazaki\'s most grounded film — a witch who loses her powers and has to find them again on her own. It\'s about creative block as much as it\'s about flying.',
+'Lady Vengeance':'Park Chan-wook\'s most formally elegant film — where Oldboy was brutal and blunt, this one is patient and precise. Yeong-ae Lee gives a career-defining performance.',
+'Suspiria':'Guadagnino remade Argento\'s giallo as a slow-build body horror about institutional evil. Weirder and more disturbing than the original.',
+'The Invitation':'A dinner party that becomes something much darker. Karyn Kusama is criminally underrated and this is her tightest film.',
+'Akira':'The animation still hasn\'t been matched and the world-building still hasn\'t been topped. Otomo made the template for every cyberpunk dystopia that followed.',
+'Belle':'Hosoda built an entire digital world to ask what it costs to be truly seen. The concert sequence is genuinely breathtaking.',
+'A Ghost Story':'Rooney Mara eats a pie for four uncut minutes. A ghost wanders an empty house for decades. Lowery makes grief feel like it actually lasts forever.',
+'Revenge':'Coralie Fargeat turned the rape-revenge genre inside out — shot like fashion photography until it very much isn\'t. One of the best debuts of the decade.',
+'Donnie Darko':'Richard Kelly made this for almost nothing and it still feels like a film that knows something you don\'t. Theatrical cut, not the director\'s.',
+'The Fall':'Tarsem Singh spent four years filming in 28 countries for a story-within-a-story where the visuals aren\'t the point — and then they become everything.',
+'American Gangster':'Scott and Washington making a 70s crime film in 2007 with complete conviction. Crowe and Washington haven\'t been better matched.',
+'Ran':'Kurosawa adapts King Lear at 75 and makes something that feels like a monument. The battle scenes have never been matched.',
+'Moulin Rouge!':'Luhrmann threw every visual idea he\'d ever had at this and it holds together. The Elephant Medley is one of the great movie sequences.',
+'Train to Busan':'The zombie film for people who are done with zombie films — Yeon Sang-ho makes you care about people before he destroys them.',
+'The Lighthouse':'Eggers shot this in near-square black and white on 35mm. Pattinson and Dafoe trapped on a rock, losing everything, including their grip on what\'s real. The sound design alone.',
+'The Witch':'Eggers\' debut — a Puritan family slowly turns on each other while something watches from the tree line. The period dialogue is real.',
+'Possession':'Żuławski made this during his actual divorce and it shows. Isabelle Adjani won Cannes and had a breakdown making it. Genuinely unclassifiable.',
+'Prisoners':'Villeneuve at his most unsparing — a missing children thriller that refuses to give you the catharsis you came for. Every Deakins frame looks like a bruise.',
+'The Night Comes for Us':'Indonesian action choreography at its most extreme. Essentially a feature-length proof that the Raid films weren\'t a fluke.',
+'There Will Be Blood':'PTA and Daniel Day-Lewis made a 158-minute study of a man who hates people but needs them. The milkshake scene is the whole film in 30 seconds.',
+'West Side Story':'Spielberg made this at 75 and it\'s the most alive he\'s looked in years. Ariana DeBose fully deserved the Oscar.',
+"Rosemary's Baby":'Polanski shot this in the Dakota — the same building Lennon was killed in. Mia Farrow holds every scene together by sheer bewildered dread.',
+'Titane':'Ducournau won the Palme d\'Or with a film about a woman who has sex with a car. It\'s also a love story. Do not try to summarize it.',
+'What We Do in the Shadows':'Waititi made the definitive vampire flatmate mockumentary before any of them were famous. Still the funniest thing he\'s made.',
+'Paris Is Burning':'Livingston documented the New York ballroom scene in 1990 and accidentally made one of the most important American films ever made.',
+'The Rocky Horror Picture Show':'Best experienced loudly in a room full of people. The audience participation film that became the audience participation film.',
+'My Neighbor Totoro':'Miyazaki made this as a B-movie companion piece and it became the studio\'s logo. No villain, no stakes, just two kids and a forest spirit.',
+'Perfect Days':'Wenders spent three months in Tokyo following a toilet cleaner who has achieved some form of peace. About simplicity without being simple.',
+'Y Tu Mamá También':'Cuarón made this between Harry Potter films. Two teenage boys and an older woman on a road trip — it\'s also a film about Mexico and class and the year 2001.',
+'Rye Lane':'A London rom-com shot on anamorphic lenses with two strangers and an energy that\'s almost embarrassingly charming.',
+'Friday':'Ice Cube wrote this in a weekend and it became a genre. South Central comedy that\'s warmer than it pretends to be.',
+'Crouching Tiger, Hidden Dragon':'Ang Lee hired the best martial artists alive and asked them to move like they were dreaming. The bamboo fight is iconic for a reason.',
+'Phantom Thread':'PTA\'s quietest film — a love story about control and two people who are equally impossible to live with. Reynolds Woodcock is a monster and you root for him anyway.',
+'One Cut of the Dead':'Do not let anyone tell you what happens in the second half. Just watch it.',
+'The Holy Mountain':'Jodorowsky made this in 1973 as a psychedelic spiritual allegory and funded it by learning tarot. Exactly as strange as that sounds.',
+'From Dusk Till Dawn':'A Tarantino-written crime film that becomes a vampire film at exactly the midpoint. Rodriguez directed, Clooney and Hayek are both perfect for what it is.',
+'Ghost in the Shell':'Oshii\'s 1995 film is still asking questions that AI is only now catching up to. What makes an identity persist when the body can be copied?',
+'Do the Right Thing':'Spike Lee set this over one day in the hottest summer he could find. The ending still divides rooms 35 years later.',
+'Barbarian':'Do not read anything about it. The structure is the whole film.',
+'Little Fish':'An amnesia epidemic in Seattle. Olivia Cooke and Jack O\'Connell trying to hold their relationship together as one of them forgets it.',
+"A Knight's Tale":'Heath Ledger in a medieval sports movie with a Queen soundtrack. Completely ridiculous and completely committed to the bit.',
+'Crimson Peak':'Del Toro made a gothic romance, not a horror film — the ghosts are there to tell the truth. The production design is extraordinary.',
+"One Flew Over the Cuckoo's Nest":'Nicholson vs. Fletcher, Forman directing — a film about institutional power that\'s also the funniest sad film ever made.',
+'The Brothers Bloom':'Rian Johnson\'s second film — a conman story where you\'re never sure if the con is the film itself.',
+'The Wild Robot':'DreamWorks made the most visually ambitious thing they\'ve ever produced and matched it with genuine emotional intelligence.',
+'In the Mood for Love':'Wong Kar-wai made a film about what two people don\'t say to each other. Maggie Cheung wears 20 cheongsams and every scene is a held breath.',
+'Saint Maud':'Rose Glass made a debut about religious zealotry and loneliness that never tips into exploitation. Morfydd Clark carries every frame.',
+'2046':'The follow-up to In the Mood for Love — less accessible, more ravishing. A man writes science fiction to avoid living in it.',
+'Rebel Ridge':'Jeremy Saulnier made a legal thriller with almost no violence that never stops being tense. Aaron Pierre carries the whole film on presence alone.',
+'Sorcerer':'Friedkin hired actual mercenaries to drive trucks with actual nitroglycerin over actual bridges. Four men, no good options, no sentimentality.',
+'The Thing':'Carpenter\'s practical effects are still unbeaten 40 years later. The paranoia is the horror — not the creature.',
+'The Outfit':'A tailor in 1950s Chicago who may or may not be the most dangerous person in the room. Graham Moore\'s directorial debut and a confident one.',
+'Bones and All':'Guadagnino makes a cannibalism road movie that\'s actually a love story. Taylor Russell holds together things that shouldn\'t work.',
+'The Apartment':'Wilder\'s masterpiece — an office satire that keeps dropping into something much more painful. Lemmon and MacLaine at their best.',
+'The Worst Person in the World':'Trier made the best film about modern ambivalence and the fear of committing to a life. Renate Reinsve won Cannes and is extraordinary.',
+'Brick':'Johnson wrote a hardboiled noir set in a California high school and played it completely straight. The invented slang takes about ten minutes to calibrate to.',
+'Breathless':'Godard invented modern cinema in 90 minutes. The jump cuts weren\'t a mistake — he left them in because they felt true.',
+'The Five Devils':'Mysius made a French film about a girl who can smell memories. Quietly devastating in a way you don\'t see coming.',
+'Mulholland Drive':'Lynch made this as a TV pilot that got rejected, then rebuilt it into a film about Hollywood as a murder of the self. The diner scene.',
+'Paprika':'Satoshi Kon\'s last complete film — Inception borrowed its architecture but not its soul.',
+'Kubo and the Two Strings':'Laika\'s best film. Stop-motion samurai with one of the great third acts in animated film.',
+'Tampopo':'The first ramen western — Itami made food pornography that\'s actually about community and loneliness.',
+'Sound of Metal':'Marder built the entire sound design around the experience of hearing loss. Riz Ahmed learned drums and gave one of the decade\'s great performances.',
+'Attack the Block':'Cornish made an alien invasion film from the perspective of the kids that films like this usually ignore. John Boyega\'s debut.',
+'Memories of Murder':'Bong Joon-ho in 2003 — two detectives who cannot solve a serial murder. The ending is one of the best in any thriller ever made.',
+'The Umbrellas of Cherbourg':'Every single line is sung. Demy made a musical where the romance doesn\'t work out and it\'s somehow more romantic for it.',
+'Midnight Run':'De Niro and Charles Grodin on a cross-country trip. The funniest straight comedy of the 80s and it\'s not close.',
+'Blink Twice':'Zoë Kravitz\'s debut — a private island that does what you think it\'s doing, but worse. Naomi Ackie carries it.',
+'How to Have Sex':'Molly Manning Walker made a film about a girls\' holiday in Malia that turns into something much harder to watch. Mia McKenna-Bruce is extraordinary.',
+'Steel Magnolias':'Six women in a Louisiana beauty salon. The last twenty minutes will get you if you let it.',
+'Stardust':'Vaughn\'s fantasy road movie — what if a fallen star was a person and everyone wanted to own her. Warm and strange.',
+'Gremlins':'Dante made a Christmas horror comedy that\'s actually about small-town American capitalism. The mogwai are adorable.',
+'Thirst':'Park Chan-wook made a vampire film about a priest. Funny, genuinely sexy, and disturbing in that specific Park way.',
+'The Evil Dead':'Raimi made this for $375,000 on 16mm in the Tennessee woods. The tree scene is infamous for a reason.',
+'Out of Sight':'Soderbergh\'s best pure entertainment — Clooney and Lopez have chemistry that shouldn\'t exist and completely does.',
+'Four Lions':'Chris Morris made a dark comedy about British jihadists who are incompetent in very specific ways. Genuinely funny about something that shouldn\'t be.',
+'Birds of Prey':'Yan\'s Harley Quinn film is the best DC film of the decade — kinetic, funny, and actually about something.',
+'Turning Red':'Domee Shi made a film about a 13-year-old who turns into a red panda when she gets emotional. Pixar released it streaming because they didn\'t know what to do with it. They were wrong.',
+'Cloud Atlas':'The Wachowskis and Tykwer made a six-story nested structure with the same cast across centuries. Divisive for exactly the right reasons.',
+'City of God':'Meirelles shot this with non-professional actors from the actual favela and made one of the great crime films of the century.',
+'Paper Moon':'Ryan O\'Neal and his actual daughter Tatum grift their way across Depression-era Kansas. Bogdanovich shot in black and white because color would\'ve been wrong.',
+'Eyes Wide Shut':'Kubrick\'s last film — a rich man\'s fever dream about desire and what hides behind money and class. The final scene.',
+'Raise the Red Lantern':'Zhang Yimou and Gong Li made five films together and this is the coldest and most precise.',
+'Malcolm X':'Lee gave Denzel three and a half hours and Denzel used every minute.',
+'Hook':'Spielberg made Peter Pan as a fully grown man who forgot he was Peter Pan. It knows exactly what it is.',
+'Metropolis':'Lang made this in 1927 and the images are still being borrowed. The most influential science fiction film ever made.',
+'Midsommar':'Aster made Hereditary in daylight — a grief film disguised as a cult horror set in the Swedish summer. Disturbing because the rituals are earnest.',
+'Portrait of a Lady on Fire':'Sciamma made the most formally controlled romance of the decade. Three days on an island, two women, no men.',
+'Drive':'Winding Refn made a 70s genre film in 2011 — Ryan Gosling barely speaks and it\'s the right call.',
+'Decision to Leave':'Park Chan-wook makes a film about a detective who may be falling in love with a murder suspect. The most controlled thriller of 2022.',
+'Past Lives':'Celine Song\'s debut — two Koreans separated by immigration who meet again 24 years later. The ending is devastating for what it leaves out.',
+'I Saw the TV Glow':'Jane Schoenbrun made a horror film about dissociation and identity that works as both genre and personal essay. Not for everyone, completely for some people.',
+'Love Lies Bleeding':'Glass made a neon-soaked neo-noir about a woman who falls for a bodybuilder. Kristen Stewart at her most committed.',
+'Oldboy':'Park Chan-wook\'s middle film in the Vengeance trilogy — the hallway fight is a single take and the ending is the ending.',
+'Knives Out':'Johnson made an Agatha Christie film where he tells you who did it in the first act. The mystery is why it still works.',
+'The Handmaiden':'Park Chan-wook adapted a Welsh novel and set it in occupied Korea. The twist structure is the film.',
+'Mad Max: Fury Road':'Miller filmed this in Namibia over 120 days in the actual desert. Essentially a feature-length chase sequence with things to say.',
+'La La Land':'Chazelle made a musical about the cost of ambition that\'s more cynical than it looks. The ending is the point.',
+'Dune':'Villeneuve made the most beautiful science fiction production in years. The first half of a story.',
+"Dune: Part Two":'The sequel that justifies the first — the political horror becomes central.',
+'The Green Knight':'Lowery made an Arthurian film that refuses to be about honor. About the fear of being tested and found wanting.',
+'Saltburn':'Fennell made a class horror film that\'s also a seduction. Barry Keoghan. The ending.',
+'Challengers':'Guadagnino made a love triangle film that\'s actually about competition and what ambition does to people. Zendaya.',
+'Bodies Bodies Bodies':'Reijn made a Gen Z slasher that\'s actually a slasher about Gen Z. Funnier than expected.',
+'Lady Bird':'Gerwig\'s debut — Sacramento, senior year, a mother-daughter relationship that\'s both specific and universal. Ronan is the whole film.',
+'Eighth Grade':'Burnham made a film about being 13 in 2018. The anxiety is accurate in a way that\'s hard to watch.',
+"Mid90s":'Hill made a film about a 13-year-old in South Central who finds his way into a skate crew. Almost entirely non-professional cast.',
+'The Nice Guys':'Black and Gosling and Crowe in 70s LA — the funniest action comedy of the decade.',
+'Sing Street':'Carney made a film about a Dublin kid who starts a band to impress a girl. The songs are real and they stick.',
+'Her':'Jonze made a film about a man who falls in love with an AI — it\'s become a warning instead of a fantasy.',
+'Ex Machina':'Garland made a first-contact film about power and what we do with minds we create. Alex Garland at his most controlled.',
+'Puss in Boots: The Last Wish':'DreamWorks made the most formally ambitious animated film of recent years. The animation style is genuinely new.',
+'Dope':'Rick Famuyiwa made a Compton high school film that\'s genuinely funny and genuinely sharp about race and aspiration.',
+'The Edge of Seventeen':'Hailee Steinfeld playing a teenager who is the worst and the most sympathetic. Kelly Fremon Craig\'s debut.',
+"Bottoms":'Emma Seligman made a high school sex comedy that\'s absurdist and actually committed to the bit. Genuinely funny.',
+'Good Boys':'Three sixth graders trying to replace a drone. Funnier than it should be for a film with this premise.',
+'Superbad':'Apatow-produced, Seth Rogen co-written — McLovin is still one of the great comedic creations.',
+'Booksmart':'Wilde\'s debut — two overachievers who realize they spent high school optimizing instead of living. The funniest film of 2019.',
+'The Perks of Being a Wallflower':'Chbosky adapted his own novel and trusted it. Logan Lerman and Emma Watson in high school — it earns its emotional beats.',
+'Before Sunrise':'Linklater put two strangers on a train and let them talk for 100 minutes. The whole trilogy is worth watching in order.',
+'Before Sunset':'The sequel that\'s better than the first — nine years later, one afternoon in Paris, real urgency.',
+'Before Midnight':'The one where they fight. Devastating if you\'ve seen the first two.',
+'Parasite':'Bong made a film that works simultaneously as a thriller, a satire, a horror, and a family drama. Best film of 2019.',
+'Everything Everywhere All at Once':'The Daniels threw every idea at this and it held together through sheer emotional commitment. Michelle Yeoh.',
+'Spider-Man: Across the Spider-Verse':'Still the high-water mark for superhero animation — it thinks about why comics look the way they do.',
+"Pan's Labyrinth":'Del Toro set a fairy tale during the Franco era and refused to make the fantasy world an escape. Ofelia\'s final choice.',
+'The Grand Budapest Hotel':'Anderson\'s most propulsive film — a confection that\'s also about the end of a civilization.',
+'Sinners':'Ryan Coogler made a vampire film that\'s also about the blues and the Great Migration. Michael B. Jordan in a dual role.',
+'Nosferatu':'Eggers\' most controlled film — every frame composed like a painting, the dread earned instead of manufactured.',
+};
+const MOOD_PHRASES={fun:'Looking for something genuinely fun',intense:'If you want to feel it',mind:"For something that'll stick in your head for days",emotional:"If you're ready to feel something real",action:'For pure momentum and kinetic energy',arthouse:'For something more deliberately and beautifully crafted',epic:'For a film that earns the word "epic"',scifi:'For real sci-fi with actual ideas behind it'};
+
+const WATCHLIST=[{n:'Drive My Car',y:2021},{n:'Aftersun',y:2022},{n:'The Fabelmans',y:2022},{n:'Chungking Express',y:1994},{n:'Malignant',y:2021},{n:'Hereditary',y:2018},{n:'The Place Beyond the Pines',y:2012},{n:'Weathering with You',y:2019},{n:'Barry Lyndon',y:1975},{n:'Mandy',y:2018},{n:'Suzume',y:2022},{n:"Kiki's Delivery Service",y:1989},{n:'Lady Vengeance',y:2005},{n:'Suspiria',y:2018},{n:'The Invitation',y:2015},{n:'Akira',y:1988},{n:'Belle',y:2021},{n:'A Ghost Story',y:2017},{n:'Revenge',y:2017},{n:'Donnie Darko',y:2001},{n:'The Fall',y:2006},{n:'American Gangster',y:2007},{n:'Ran',y:1985},{n:'Moulin Rouge!',y:2001},{n:'Train to Busan',y:2016},{n:'The Lighthouse',y:2019},{n:'The Witch',y:2015},{n:'Possession',y:1981},{n:'Prisoners',y:2013},{n:'The Night Comes for Us',y:2018},{n:'There Will Be Blood',y:2007},{n:'West Side Story',y:2021},{n:"Rosemary's Baby",y:1968},{n:'Titane',y:2021},{n:'What We Do in the Shadows',y:2014},{n:'Paris Is Burning',y:1990},{n:'The Rocky Horror Picture Show',y:1975},{n:'My Neighbor Totoro',y:1988},{n:'Perfect Days',y:2023},{n:'Rye Lane',y:2023},{n:'Friday',y:1995},{n:'Crouching Tiger, Hidden Dragon',y:2000},{n:'Phantom Thread',y:2017},{n:'One Cut of the Dead',y:2017},{n:'From Dusk Till Dawn',y:1996},{n:'Ghost in the Shell',y:1995},{n:'Do the Right Thing',y:1989},{n:'Barbarian',y:2022},{n:"A Knight's Tale",y:2001},{n:'Crimson Peak',y:2015},{n:"One Flew Over the Cuckoo's Nest",y:1975},{n:'The Brothers Bloom',y:2008},{n:'The Wild Robot',y:2024},{n:'Ambulance',y:2022},{n:'In the Mood for Love',y:2000},{n:'Saint Maud',y:2019},{n:'2046',y:2004},{n:'Rebel Ridge',y:2024},{n:'Sorcerer',y:1977},{n:'The Thing',y:1982},{n:'The Outfit',y:2022},{n:'Bones and All',y:2022},{n:'The Apartment',y:1960},{n:'Brick',y:2005},{n:'Breathless',y:1960},{n:'Ben-Hur',y:1959},{n:'Paper Moon',y:1973},{n:'Eyes Wide Shut',y:1999},{n:'Raise the Red Lantern',y:1991},{n:'Malcolm X',y:1992},{n:'Hook',y:1991},{n:"L'Avventura",y:1960},{n:'Cloud Atlas',y:2012},{n:'City of God',y:2002},{n:'Mulholland Drive',y:2001},{n:'Paprika',y:2006},{n:'Kubo and the Two Strings',y:2016},{n:'Rush Hour',y:1998},{n:'Metropolis',y:1927},{n:'Tampopo',y:1985},{n:'Sound of Metal',y:2019},{n:'Attack the Block',y:2011},{n:'Memories of Murder',y:2003},{n:'The Umbrellas of Cherbourg',y:1964},{n:'Midnight Run',y:1988},{n:'Blink Twice',y:2024},{n:'How to Have Sex',y:2023},{n:'Steel Magnolias',y:1989},{n:'Stardust',y:2007},{n:'Gremlins',y:1984},{n:'Thirst',y:2009},{n:'The Evil Dead',y:1981},{n:'Out of Sight',y:1998},{n:'The Five Devils',y:2022},{n:'Turning Red',y:2022},{n:'Four Lions',y:2010},{n:'Birds of Prey',y:2020},{n:'Little Fish',y:2020}];
+const RATED=new Set(["Guardians of the Galaxy","Boyhood","12 Years a Slave","The Dark Knight","The Avengers","Kill Bill: Vol. 1","Silver Linings Playbook","Se7en","The Dark Knight Rises","American Beauty","Memento","The Shawshank Redemption","Forrest Gump","Batman Begins","Toy Story 3","Kill Bill: Vol. 2","The Perks of Being a Wallflower","How to Train Your Dragon","Iron Man","Life of Pi","The Breakfast Club","Avatar","Hot Fuzz","The Usual Suspects","The Girl with the Dragon Tattoo","Harry Potter and the Deathly Hallows: Part 2","District 9","Catch Me If You Can","Star Trek","Ferris Bueller's Day Off","Kick-Ass","Spider-Man","Spider-Man 2","Zombieland","Monty Python and the Holy Grail","The Prestige","Blood Diamond","Rocky","Up in the Air","Toy Story","Minority Report","Shaun of the Dead","Pirates of the Caribbean: The Curse of the Black Pearl","Short Term 12","Black Swan","Before Midnight","Requiem for a Dream","Rush","Captain Phillips","Blue Jasmine","Annie Hall","Children of Men","The Lord of the Rings: The Two Towers","Pulp Fiction","The Lord of the Rings: The Return of the King","Gone Girl","Fight Club","Whiplash","Parasite","Joker","Interstellar","La La Land","The Wolf of Wall Street","Jojo Rabbit","Her","The Social Network","Django Unchained","1917","Blade Runner 2049","Us","Spider-Man: No Way Home","The Suicide Squad","Bo Burnham: Inside","Soul","The Queen's Gambit","The Trial of the Chicago 7","Get Out","Thor: Ragnarok","Coco","The Shape of Water","Roma","Eighth Grade","Vice","Free Solo","Captain America: Civil War","Spider-Man: Into the Spider-Verse","Everything Everywhere All at Once","Inception","John Wick","Avatar: The Way of Water","The Menu","Glass Onion","The Nice Guys","Sing Street","21 Jump Street","The Big Short","Kingsman: The Secret Service","Lady Bird","The Lego Movie","Superbad","The Hateful Eight","Inglourious Basterds","Star Wars: The Force Awakens","The Departed","The Incredibles","All Quiet on the Western Front","Pan's Labyrinth","Mission: Impossible – Fallout","Past Lives","Nimona","Puss in Boots: The Last Wish","Oppenheimer","Ex Machina","Elf","Saltburn","The Hunger Games: The Ballad of Songbirds & Snakes","Dungeons & Dragons: Honor Among Thieves","Juno","The Iron Claw","Good Grief","Oldboy","Moana","Bridesmaids","Dune","Dune: Part Two","Arrival","Godzilla Minus One","Love Lies Bleeding","Hit Man","The Green Knight","Gladiator","Twisters","Crazy, Stupid, Love.","Prometheus","Logan Lucky","The Batman","School of Rock","RRR","Call Me by Your Name","Challengers","Booksmart","Bullet Train","Bodies Bodies Bodies","Before Sunrise","Rogue One: A Star Wars Story","Wicked","The Northman","Harry Potter and the Prisoner of Azkaban","Harry Potter and the Goblet of Fire","Skyfall","Before Sunset","Furiosa: A Mad Max Saga","I Saw the TV Glow","Portrait of a Lady on Fire","Nosferatu","Conclave","Strange Darling","Petite Maman","No Country for Old Men","Ocean's Eleven","Chef","Ocean's Twelve","Mission: Impossible – Rogue Nation","Jurassic Park","Spider-Man: Across the Spider-Verse","Knives Out","One Battle After Another","Sinners","The Grand Budapest Hotel","Drive","Mad Max: Fury Road","The Handmaiden","Decision to Leave","Lawrence of Arabia","Casino Royale","No Time to Die","Perfect Blue","The Shining","The Young Girls of Rochefort","Monkey Man","Prey","It Follows","Raiders of the Lost Ark","The Empire Strikes Back","Mean Girls","Ratatouille","Fargo","Forgetting Sarah Marshall","Bad Boys: Ride or Die","Babylon","Barbie","John Wick: Chapter 4","Pearl","Midsommar","Encanto","Mission: Impossible – Dead Reckoning","Ocean's Thirteen","KPop Demon Hunters","Tangled","Mickey 17","Thunderbolts*","Superman","The Parent Trap","La Chimera","Luca","Companion","Avatar: Fire and Ash","The Talented Mr. Ripley","Moonstruck","Hoppers","Zootopia","Zootopia 2","F1","Y Tu Mamá También","Raw","Project Hail Mary"]);
+
+// ── TMDB helpers ──
+async function tmdb(path,params={}){const url=new URL(`${API}${path}`);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));const r=await fetch(url,{headers:{Authorization:`Bearer ${TOKEN}`}});if(!r.ok)return null;return r.json();}
+function cg(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}}
+function cs(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+async function searchTMDB(n,y){const k=`s_${n}_${y}`;const c=cg(k);if(c!==null)return c;const d=await tmdb('/search/movie',{query:n,year:y,language:'en-US'});const m=d?.results?.[0]||null;cs(k,m);return m;}
+async function movieDetail(id){const k=`md_${id}`;const c=cg(k);if(c)return c;const d=await tmdb(`/movie/${id}`,{language:'en-US'});if(d)cs(k,d);return d;}
+async function movieProviders(id){const k=`pv_${id}`;const c=cg(k);if(c!==null)return c;const d=await tmdb(`/movie/${id}/watch/providers`);const p=d?.results?.US||{};cs(k,p);return p;}
+async function movieStills(id){const k=`st_${id}`;const c=cg(k);if(c)return c;const d=await tmdb(`/movie/${id}/images`,{include_image_language:'en,null'});const s=(d?.backdrops||[]).slice(0,3).map(b=>b.file_path);cs(k,s);return s;}
+async function movieRecs(id){const k=`rc_${id}`;const c=cg(k);if(c)return c;const d=await tmdb(`/movie/${id}/recommendations`,{language:'en-US',page:1});if(d)cs(k,d);return d;}
+
+// ── Scoring & theming ──
+const F={moods:new Set(),runtimes:new Set()};
+
+function getThemes(genres,id){const out=[];for(const g of genres){const opts=THEME_OPTS[g];if(opts){out.push(opts[id%opts.length]);if(out.length>=3)break;}}return out.length?out:['compelling storytelling','strong performances'];}
+
+function matchScore(movie,queryText){
+  let score=0,weight=0;
+  const q=(movie.vote/10)*100;score+=q*0.2;weight+=0.2;
+  let taste=60;for(const g of movie.genres){const w=ERIC_W[g]||1.0;taste=Math.min(100,taste*w);}score+=taste*0.25;weight+=0.25;
+  if(F.moods.size){const mg=new Set([...F.moods].flatMap(m=>MOOD_GENRES[m]||[]));const overlap=movie.genres.filter(g=>mg.has(g)).length;score+=Math.min(100,overlap*35)*0.35;weight+=0.35;}
+  if(F.runtimes.size&&movie.runtime>0){const rt=movie.runtime;const hit=[...F.runtimes].some(r=>(r==='short'&&rt<90)||(r==='medium'&&rt>=90&&rt<=120)||(r==='long'&&rt>120));score+=(hit?100:15)*0.1;weight+=0.1;}
+  if(queryText&&queryText.trim().length>5){const qw=queryText.toLowerCase().split(/\s+/).filter(w=>w.length>3);const hay=`${movie.title} ${movie.overview||''}`.toLowerCase();const hits=qw.filter(w=>hay.includes(w)).length;score+=Math.min(100,(hits/Math.max(1,qw.length))*250)*0.1;weight+=0.1;}
+  return Math.min(98,Math.max(68,Math.round(68+(score/Math.max(weight,0.2)/100)*30)));
+}
+
+function matchScoreSeed(movie,seedGenres){
+  let base=(movie.vote/10)*100;
+  let taste=60;for(const g of movie.genres){const w=ERIC_W[g]||1.0;taste=Math.min(100,taste*w);}
+  const overlap=movie.genres.filter(g=>seedGenres.has(g)).length;
+  const genreScore=Math.min(100,overlap*30);
+  const seedBoost=(movie.seedMatches||0)*15;
+  const raw=(base*0.2+taste*0.3+genreScore*0.35+seedBoost*0.15);
+  return Math.min(98,Math.max(68,Math.round(68+(raw/100)*30)));
+}
+
+function matchColor(p){return p>=93?'#22c55e':p>=85?'#84cc16':p>=78?'#f59e0b':'#f97316';}
+
+function writeUp(movie,queryText){
+  const pitch=FILM_DB[movie.title];
+  if(pitch)return pitch;
+  const comp=COMPS[movie.genres.find(x=>COMPS[x])];
+  if(comp){
+    const opts=[
+      `The ${comp.trait} that made <em>${comp.film}</em> work runs through this one — just routed differently.`,
+      `Your history with <em>${comp.film}</em> points here. Same quality of ${comp.trait}, different frame.`,
+      `If <em>${comp.film}</em>'s ${comp.trait} is something you return to, ${movie.title} is the next move.`
+    ];
+    const suffix=movie.vote>=8.0?` At ${movie.vote.toFixed(1)}/10 it earns the comparison.`:'';
+    return opts[movie.id%3]+suffix;
+  }
+  return movie.vote>=8.0?`At ${movie.vote.toFixed(1)}/10 it\'s genuinely exceptional. Your taste in this space points here.`:`${movie.title} fits the pattern of what you\'ve been responding to.`;
+}
+
+function writeUpSeed(movie,seedTitles){
+  const pitch=FILM_DB[movie.title];
+  if(pitch)return pitch;
+  const comp=COMPS[movie.genres.find(x=>COMPS[x])];
+  const seeds=seedTitles.filter(Boolean);
+  if(comp){
+    if(seeds.length===1)return `Recommended off <em>${seeds[0]}</em> — shares that quality of ${comp.trait}.`;
+    if(seeds.length===2)return `Sits between <em>${seeds[0]}</em> and <em>${seeds[1]}</em> in terms of ${comp.trait}.`;
+    return `Threads from all three of your picks run through this one — ${comp.trait} is the common element.`;
+  }
+  if(seeds.length===1)return `TMDB points here directly from <em>${seeds[0]}</em>. The connection is in the DNA.`;
+  return `Appears across recommendations for multiple of your picks. There\'s something here.`;
+}
+
+// ── Card rendering ──
+function streamBadgesHtml(movie){
+  const show=movie.providerDetails.filter(p=>SVC_META[p.provider_id]).slice(0,2);
+  return show.map(p=>{const s=SVC_META[p.provider_id];return`<span class="stream-pill" style="background:${s.bg};color:${s.color||'#fff'}">${s.name}</span>`;}).join('');
+}
+
+function cardHtml(movie,rank,isWatchlist,queryText,seedTitles){
+  const pct=seedTitles&&movie.score!=null?movie.score:matchScore(movie,queryText);
+  const color=matchColor(pct);
+  const themes=getThemes(movie.genres,movie.id);
+  const rt=movie.runtime>0?`${movie.runtime} min`:'';
+  const wu=seedTitles?writeUpSeed(movie,seedTitles):writeUp(movie,queryText);
+  const posterHtml=movie.poster?`<img class="rec-poster" src="${movie.poster}" alt="" loading="lazy">`:`<div class="rec-no-poster">🎬</div>`;
+  return`<div class="rec-card">
+    <div class="card-body">
+      <div class="rec-rank">${rank}</div>
+      <div class="rec-poster-wrap">${posterHtml}${isWatchlist?'<div class="watchlist-tag">Watchlist</div>':''}</div>
+      <div class="rec-info">
+        <div class="rec-top">
+          <div class="rec-title-block">
+            <div class="rec-num">#${rank}</div>
+            <div class="rec-title">${movie.title}</div>
+            <div class="rec-meta">${movie.year}${rt?` · ${rt}`:''}${streamBadgesHtml(movie)}</div>
+          </div>
+          <div class="rec-match-block">
+            <div class="rec-match" style="color:${color}">${pct}%</div>
+            <div class="match-label">MATCH</div>
+          </div>
+        </div>
+        <div class="rec-themes">${themes.map(t=>`<span class="theme-tag">${t}</span>`).join('')}</div>
+        <div class="rec-writeup">${wu}</div>
+      </div>
+    </div>
+  </div>`;}
+
+function skels(n){return Array(n).fill(0).map(()=>`<div class="skel-card"><div class="skel-inner"></div></div>`).join('');}
+
+async function injectStills(container){
+  const wraps=container.querySelectorAll('.stills-wrap[data-id]');
+  for(const el of wraps){
+    const id=+el.dataset.id;
+    const stills=await movieStills(id);
+    if(stills.length){el.innerHTML=stills.map(s=>`<img src="${STILL}${s}" alt="" loading="lazy">`).join('');}
+    await sleep(40);
+  }
+}
+
+// ── Tab 1: load & render ──
+let watchlistMovies=[],loaded=false;
+
+async function loadWatchlist(){
+  const deduped=[...new Map(WATCHLIST.map(m=>[`${m.n}|${m.y}`,m])).values()];
+  const results=[];const batches=[];
+  for(let i=0;i<deduped.length;i+=5)batches.push(deduped.slice(i,i+5));
+  for(const batch of batches){
+    await Promise.all(batch.map(async m=>{
+      const s=await searchTMDB(m.n,m.y);if(!s)return;
+      const[det,prov]=await Promise.all([movieDetail(s.id),movieProviders(s.id)]);
+      results.push({id:s.id,title:det?.title||m.n,year:m.y,poster:det?.poster_path?`${POSTER}${det.poster_path}`:null,genres:(det?.genres||[]).map(g=>g.id),runtime:det?.runtime||0,vote:det?.vote_average||0,overview:det?.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[],isWatchlist:true});
+    }));
+    document.getElementById('status-1').textContent=`Loading watchlist… ${results.length}/${deduped.length}`;
+    await sleep(100);
+  }
+  watchlistMovies=results;loaded=true;
+  document.getElementById('status-1').textContent='';
+  renderTab1(document.getElementById('query-text').value);
+}
+
+async function fetchDiscover(){
+  const genres=[...new Set([...F.moods].flatMap(m=>MOOD_GENRES[m]||[]))];
+  const rtKey=[...F.runtimes][0]||'any';
+  const ck=`dv3_${genres.join(',')}_${rtKey}`;
+  const cached=cg(ck);if(cached)return cached;
+  const params={language:'en-US',sort_by:'vote_average.desc','vote_count.gte':200,include_adult:false};
+  if(genres.length)params.with_genres=genres.join('|');
+  if(F.runtimes.has('short'))params['with_runtime.lte']=100;
+  else if(F.runtimes.has('medium'))params['with_runtime.lte']=130;
+  const seen=new Set([...RATED,...WATCHLIST.map(m=>m.n)]);
+  const raw=[];
+  for(let pg=1;pg<=5&&raw.length<40;pg++){
+    const d=await tmdb('/discover/movie',{...params,page:pg});
+    for(const m of d?.results||[]){if(!seen.has(m.title)&&m.vote_average>=6.5&&!raw.find(r=>r.id===m.id)){raw.push(m);}if(raw.length>=40)break;}
+    await sleep(60);
+  }
+  const enriched=[];
+  for(const m of raw.slice(0,20)){
+    const[det,prov]=await Promise.all([movieDetail(m.id),movieProviders(m.id)]);
+    enriched.push({id:m.id,title:m.title,year:(m.release_date||'').slice(0,4),poster:m.poster_path?`${POSTER}${m.poster_path}`:null,genres:m.genre_ids||[],runtime:det?.runtime||0,vote:m.vote_average||0,overview:m.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[]});
+    await sleep(40);
+  }
+  cs(ck,enriched);return enriched;
+}
+
+function rtMatch(m){if(!F.runtimes.size||m.runtime===0)return true;const rt=m.runtime;return[...F.runtimes].some(r=>(r==='short'&&rt<=100)||(r==='medium'&&rt<=130));}
+function moodMatch(m){if(!F.moods.size)return true;const mg=new Set([...F.moods].flatMap(x=>MOOD_GENRES[x]||[]));return m.genres.some(g=>mg.has(g));}
+
+let lastDisc=null;
+function renderTab1(queryText,discMovies){
+  const sp=document.getElementById('stream-picks');
+  const dp=document.getElementById('disc-picks');
+  if(!loaded){sp.innerHTML=skels(5);dp.innerHTML=skels(5);return;}
+  if(discMovies!==undefined)lastDisc=discMovies;
+  const q=queryText||'';
+  const streamCandidates=watchlistMovies.filter(m=>m.flatrate.some(id=>MY_SERVICES.has(id))&&rtMatch(m)&&moodMatch(m)).sort((a,b)=>matchScore(b,q)-matchScore(a,q)).slice(0,5);
+  sp.innerHTML=streamCandidates.length?streamCandidates.map((m,i)=>cardHtml(m,i+1,true,q,null)).join(''):'<div class="empty-msg">No watchlist matches on your streaming services — try different filters.</div>';
+  if(lastDisc){
+    const scored=[...lastDisc].sort((a,b)=>matchScore(b,q)-matchScore(a,q)).slice(0,5);
+    dp.innerHTML=scored.length?scored.map((m,i)=>cardHtml(m,i+1,false,q,null)).join(''):'<div class="empty-msg">No discover results — try different filters.</div>';
+  }
+}
+
+// ── Tab 1 events ──
+document.querySelectorAll('#mood-pills .mood-pill').forEach(p=>p.addEventListener('click',()=>{p.classList.toggle('on');if(p.classList.contains('on'))F.moods.add(p.dataset.mood);else F.moods.delete(p.dataset.mood);}));
+document.querySelectorAll('#runtime-pills .pill').forEach(p=>p.addEventListener('click',()=>{document.querySelectorAll('#runtime-pills .pill').forEach(x=>{x.classList.remove('on');F.runtimes.delete(x.dataset.rt);});p.classList.add('on');F.runtimes.add(p.dataset.rt);}));
+
+const findBtn=document.getElementById('find-btn');
+findBtn.addEventListener('click',async()=>{
+  findBtn.classList.add('loading');findBtn.textContent='Finding…';
+  document.getElementById('disc-picks').innerHTML=skels(5);
+  document.getElementById('status-1').textContent='Fetching discoveries…';
+  const disc=await fetchDiscover();
+  document.getElementById('status-1').textContent='';
+  renderTab1(document.getElementById('query-text').value,disc);
+  findBtn.classList.remove('loading');findBtn.textContent='Find My Movie';
+});
+
+document.getElementById('sidebar-toggle').addEventListener('click',()=>{
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
+
+// ── Tab 2: Based On ──
+const seedData=[null,null,null]; // {id, title, year, poster, genres}
+
+function syncSeedBoxes(){
+  ['mobile','desktop'].forEach(pfx=>{
+    for(let i=0;i<3;i++){
+      const box=document.getElementById(`seed-${pfx==='mobile'?'m':'d'}-${i}`);
+      if(!box)return;
+      const sd=seedData[i];
+      if(sd){
+        box.innerHTML=`<img src="${sd.poster||''}" alt="" onerror="this.style.display='none'"><div class="seed-title-overlay">${sd.title}</div><button class="remove-btn" data-slot="${i}" data-pfx="${pfx}">✕</button>`;
+        box.classList.add('filled');
+      } else {
+        box.innerHTML=`<span class="plus">+</span><span class="add-label">${pfx==='mobile'?'Add Movie':'Add'}</span>`;
+        box.classList.remove('filled');
+      }
+    }
+  });
+  // Re-attach remove listeners
+  document.querySelectorAll('.remove-btn').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{e.stopPropagation();seedData[+btn.dataset.slot]=null;syncSeedBoxes();});
+  });
+}
+
+// Open search overlay
+let activeSlot=0;
+function openSearch(slot){searchMode='seed';activeSlot=slot;document.getElementById('search-overlay').classList.add('open');document.getElementById('search-input').value='';document.getElementById('search-results').innerHTML='<div class="search-placeholder">Start typing to search…</div>';setTimeout(()=>document.getElementById('search-input').focus(),100);}
+
+['mobile','desktop'].forEach(pfx=>{
+  for(let i=0;i<3;i++){
+    const id=`seed-${pfx==='mobile'?'m':'d'}-${i}`;
+    document.getElementById(id)?.addEventListener('click',function(){if(!this.classList.contains('filled'))openSearch(i);});
+  }
+});
+document.getElementById('search-close').addEventListener('click',()=>document.getElementById('search-overlay').classList.remove('open'));
+document.getElementById('search-overlay').addEventListener('click',(e)=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+let searchTimer=null;
+document.getElementById('search-input').addEventListener('input',function(){
+  clearTimeout(searchTimer);
+  const q=this.value.trim();
+  if(!q){document.getElementById('search-results').innerHTML='<div class="search-placeholder">Start typing to search…</div>';return;}
+  searchTimer=setTimeout(async()=>{
+    const data=await tmdb('/search/movie',{query:q,language:'en-US',page:1});
+    const results=(data?.results||[]).slice(0,8);
+    if(!results.length){document.getElementById('search-results').innerHTML='<div class="search-placeholder">No results found</div>';return;}
+    document.getElementById('search-results').innerHTML=results.map(m=>`
+      <div class="search-result" data-id="${m.id}" data-title="${m.title.replace(/"/g,'&quot;')}" data-year="${(m.release_date||'').slice(0,4)}" data-poster="${m.poster_path?POSTER+m.poster_path:''}">
+        ${m.poster_path?`<img src="${POSTER}${m.poster_path}" alt="">`:'<div style="width:36px;height:54px;background:var(--card2);border-radius:4px;flex-shrink:0"></div>'}
+        <div class="search-result-info">
+          <div class="search-result-title">${m.title}</div>
+          <div class="search-result-year">${(m.release_date||'').slice(0,4)}</div>
+        </div>
+      </div>`).join('');
+    document.querySelectorAll('.search-result').forEach(el=>{
+      el.addEventListener('click',async()=>{
+        const id=+el.dataset.id;
+        document.getElementById('search-overlay').classList.remove('open');
+        if(searchMode==='watchlist'){
+          await addToWatchlist({id,title:el.dataset.title,year:el.dataset.year,poster:el.dataset.poster});
+        } else {
+          const det=await movieDetail(id);
+          seedData[activeSlot]={id,title:el.dataset.title,year:el.dataset.year,poster:el.dataset.poster,genres:(det?.genres||[]).map(g=>g.id)};
+          syncSeedBoxes();
+        }
+      });
+    });
+  },300);
+});
+
+async function runMatch(){
+  const picks=seedData.filter(Boolean);
+  if(!picks.length){alert('Add at least one movie first!');return;}
+  const matchQuery=(document.getElementById('match-query-desktop')?.value||document.getElementById('match-query-mobile')?.value||'').trim();
+  const st2=document.getElementById('status-2');
+  st2.textContent='Finding recommendations…';
+  document.getElementById('match-stream-picks').innerHTML=skels(5);
+  document.getElementById('match-disc-picks').innerHTML=skels(5);
+
+  const seedGenres=new Set(picks.flatMap(p=>p.genres||[]));
+  const seedTitles=picks.map(p=>p.title);
+  const seen=new Set([...RATED,...WATCHLIST.map(m=>m.n),...picks.map(p=>p.title)]);
+
+  // ── Fetch TMDB recs first so we can score watchlist against the actual rec pool ──
+  const countMap=new Map();
+  for(const p of picks){
+    const d=await movieRecs(p.id);
+    for(const m of d?.results||[]){
+      if(!countMap.has(m.id))countMap.set(m.id,{...m,seedMatches:0});
+      countMap.get(m.id).seedMatches++;
+    }
+    await sleep(80);
+  }
+  const recIds=new Set(countMap.keys());
+
+  // ── Watchlist picks: must appear in TMDB rec pool OR have 2+ genre overlaps ──
+  const wlScored=watchlistMovies.map(m=>{
+    const inRecPool=recIds.has(m.id);
+    const genreOverlap=m.genres.filter(g=>seedGenres.has(g)).length;
+    if(!inRecPool&&genreOverlap<2)return null;
+    const base=matchScoreSeed(m,seedGenres);
+    return{...m,score:inRecPool?Math.min(98,base+8):base};
+  }).filter(Boolean).sort((a,b)=>b.score-a.score);
+
+  const streamPicks=wlScored.filter(m=>m.flatrate.some(id=>MY_SERVICES.has(id))).slice(0,5);
+  const streamIds=new Set(streamPicks.map(m=>m.id));
+
+  // ── Discover: TMDB recs excluding already-watched/watchlisted ──
+  const candidates=[...countMap.values()].filter(m=>!seen.has(m.title)).sort((a,b)=>(b.seedMatches-a.seedMatches)||(b.vote_average-a.vote_average)).slice(0,30);
+  const enriched=await Promise.all(candidates.map(async m=>{
+    const[det,prov]=await Promise.all([movieDetail(m.id),movieProviders(m.id)]);
+    return{id:m.id,title:m.title,year:(m.release_date||'').slice(0,4),poster:m.poster_path?`${POSTER}${m.poster_path}`:null,genres:m.genre_ids||[],runtime:det?.runtime||0,vote:m.vote_average||0,overview:m.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[],seedMatches:m.seedMatches};
+  }));
+  const discScored=enriched.map(m=>({...m,score:matchScoreSeed(m,seedGenres)})).sort((a,b)=>b.score-a.score);
+  const discPicks=discScored.filter(m=>!streamIds.has(m.id)).slice(0,5);
+
+  const sp=document.getElementById('match-stream-picks');
+  const dp=document.getElementById('match-disc-picks');
+  sp.innerHTML=streamPicks.length?streamPicks.map((m,i)=>cardHtml(m,i+1,true,matchQuery,seedTitles)).join(''):'<div class="empty-msg">No watchlist matches on your streaming services.</div>';
+  dp.innerHTML=discPicks.length?discPicks.map((m,i)=>cardHtml(m,i+1,false,matchQuery,seedTitles)).join(''):'';
+  st2.textContent='';
+}
+
+document.getElementById('match-find-mobile').addEventListener('click',runMatch);
+document.getElementById('match-find-desktop').addEventListener('click',runMatch);
+
+// ── Tab switching ──
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+// ── Watchlist search mode ──
+let searchMode='seed';
+
+function showToast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},2500);
+}
+
+const USER_WL=cg('user_wl')||[];
+
+async function addToWatchlist(movie){
+  if(USER_WL.find(m=>m.id===movie.id)){showToast(`${movie.title} is already on your watchlist`);return;}
+  USER_WL.push(movie);cs('user_wl',USER_WL);
+  const[det,prov]=await Promise.all([movieDetail(movie.id),movieProviders(movie.id)]);
+  if(det){
+    watchlistMovies.push({id:movie.id,title:det.title||movie.title,year:movie.year,poster:det.poster_path?`${POSTER}${det.poster_path}`:null,genres:(det.genres||[]).map(g=>g.id),runtime:det.runtime||0,vote:det.vote_average||0,overview:det.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[],isWatchlist:true});
+  }
+  showToast(`✓ ${movie.title} added to watchlist`);
+}
+
+document.getElementById('watchlist-btn').addEventListener('click',()=>{
+  searchMode='watchlist';
+  document.getElementById('search-overlay').classList.add('open');
+  document.getElementById('search-input').value='';
+  document.getElementById('search-results').innerHTML='<div class="search-placeholder">Search for a movie to add…</div>';
+  setTimeout(()=>document.getElementById('search-input').focus(),100);
+});
+
+
+// ── Boot ──
+document.getElementById('stream-picks').innerHTML=skels(5);
+loadWatchlist();
+</script>
+</body>
+</html>
