@@ -148,7 +148,7 @@ section { margin-bottom: 30px; }
 .rec-match { font-size: 22px; font-weight: 800; line-height: 1; }
 .match-label { font-size: 8px; font-weight: 600; letter-spacing: 0.8px; color: var(--muted); }
 .rec-themes { display: flex; flex-wrap: wrap; gap: 5px; }
-.theme-tag { font-size: 10px; color: var(--sub); background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px; }
+.theme-tag { font-size: 10px; color: #a0a8bc; background: rgba(255,255,255,0.07); border: 1px solid #3a3f5c; padding: 2px 9px; border-radius: 20px; }
 .rec-writeup { font-size: 12px; color: var(--sub); line-height: 1.6; }
 .rec-writeup em { color: var(--text); font-style: normal; font-weight: 600; }
 .view-more-btn {
@@ -174,8 +174,8 @@ section { margin-bottom: 30px; }
   box-shadow: 0 24px 64px rgba(0,0,0,0.6);
 }
 .detail-close {
-  position: sticky; top: 0; float: right; margin: 14px 14px 0 0;
-  background: rgba(0,0,0,0.5); border: none; color: #fff;
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,0.55); border: none; color: #fff;
   width: 30px; height: 30px; border-radius: 50%; font-size: 16px;
   display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;
 }
@@ -624,7 +624,6 @@ section { margin-bottom: 30px; }
 <!-- Detail modal -->
 <div class="detail-modal" id="detail-modal">
   <div class="detail-panel" id="detail-panel">
-    <button class="detail-close" id="detail-close">✕</button>
     <div id="detail-content"><div class="detail-loading">Loading…</div></div>
   </div>
 </div>
@@ -639,7 +638,7 @@ const MY_SERVICES=new Set([8,337,1899,15,9,350,386]);
 const SVC_META={8:{name:'Netflix',bg:'#e50914'},337:{name:'Disney+',bg:'#0b3d91'},1899:{name:'Max',bg:'#5822b4'},15:{name:'Hulu',bg:'#1ce783',color:'#000'},9:{name:'Prime',bg:'#00a8e1'},350:{name:'Apple TV+',bg:'#333'},386:{name:'Peacock',bg:'#e47b00'},531:{name:'Paramount+',bg:'#0064ff'}};
 const MOOD_GENRES={fun:[35,12,10751,10402],intense:[53,80,18,10752],mind:[878,9648,14,53],romance:[10749,18,10402],action:[28,12,10752],arthouse:[18,36,99,9648],epic:[28,12,36,10752,878,14],scifi:[878,14,53,9648],thriller:[53,80,9648],humor:[35,10749,10751]};
 const ERIC_W={18:1.18,53:1.15,80:1.12,878:1.12,9648:1.1,10402:1.1,10749:1.08,35:1.05,14:1.07,27:1.0,16:1.02,28:0.94,12:0.96};
-const THEME_OPTS={28:['kinetic momentum','physical stakes','propulsive tension'],12:['grand adventure','mythic scale','sense of wonder'],16:['visual imagination','timeless storytelling','artistic vision'],35:['sharp wit','comic chemistry','genuine laughs'],80:['moral ambiguity','criminal psychology','gritty realism'],99:['raw human truth','investigative depth','real-world stakes'],18:['quiet devastation','character study','emotional weight'],14:['otherworldly wonder','dark mythology','magical realism'],27:['creeping dread','psychological terror','atmospheric horror'],10402:['soul in the music','rhythmic storytelling','emotional catharsis'],9648:['buried secrets','paranoid atmosphere','unraveling mystery'],10749:['forbidden longing','romantic tension','emotional intimacy'],878:['conceptual boldness','future dread','existential scale'],53:['mounting paranoia','cat-and-mouse','psychological warfare'],10752:['cost of war','raw heroism','moral reckoning'],36:['epic history','human legacy','historical weight']};
+const THEME_OPTS={28:['⚡ kinetic momentum','💥 physical stakes','🔥 propulsive tension'],12:['🗺️ grand adventure','🏔️ mythic scale','✨ sense of wonder'],16:['🎨 visual imagination','📖 timeless storytelling','🎭 artistic vision'],35:['⚡ sharp wit','😄 comic chemistry','😂 genuine laughs'],80:['⚖️ moral ambiguity','🕵️ criminal psychology','🔫 gritty realism'],99:['💬 raw human truth','🔍 investigative depth','🌍 real-world stakes'],18:['💔 quiet devastation','🧠 character study','🪨 emotional weight'],14:['🌌 otherworldly wonder','🐉 dark mythology','✨ magical realism'],27:['🕷️ creeping dread','😰 psychological terror','👁️ atmospheric horror'],10402:['🎵 soul in the music','🎶 rhythmic storytelling','🎼 emotional catharsis'],9648:['🔒 buried secrets','👁️ paranoid atmosphere','🌀 unraveling mystery'],10749:['🕯️ forbidden longing','🌹 romantic tension','💫 emotional intimacy'],878:['🔭 conceptual boldness','🤖 future dread','🌑 existential scale'],53:['🫣 mounting paranoia','🎯 cat-and-mouse','🧠 psychological warfare'],10752:['⚔️ cost of war','🛡️ raw heroism','⚖️ moral reckoning'],36:['📜 epic history','🏛️ human legacy','⏳ historical weight']};
 const COMPS={53:{film:'Knives Out',trait:'sharp plotting and satisfying reveals'},80:{film:'Parasite',trait:'social tension wrapped in precise genre craft'},878:{film:'Blade Runner 2049',trait:'immersive world-building and philosophical weight'},18:{film:'The Social Network',trait:'razor-sharp writing and compelling character study'},27:{film:'Nosferatu',trait:'slow-build atmospheric dread that pays off completely'},10749:{film:'Before Sunset',trait:'quiet intimacy that hits harder than any explosion'},35:{film:'Booksmart',trait:'wit and characters you genuinely root for'},10402:{film:'La La Land',trait:'music that makes the emotions hit harder than dialogue alone'},14:{film:"Pan's Labyrinth",trait:'dark fantasy that says something real about being human'},28:{film:'Mad Max: Fury Road',trait:'kinetic action with actual ideas behind it'},16:{film:'Spider-Man: Across the Spider-Verse',trait:'visual ambition matched by emotional storytelling'},12:{film:'Raiders of the Lost Ark',trait:'pure adventure that never loses its sense of fun'},9648:{film:'The Grand Budapest Hotel',trait:'clever plotting wrapped in a beautifully distinctive world'}};
 
 const FILM_DB={
@@ -811,7 +810,7 @@ async function movieCredits(id){const k=`cr_${id}`;const c=cg(k);if(c)return c;c
 // ── Scoring & theming ──
 const F={moods:new Set(),runtimes:new Set()};
 
-function getThemes(genres,id){const out=[];for(const g of genres){const opts=THEME_OPTS[g];if(opts){out.push(opts[id%opts.length]);if(out.length>=3)break;}}return out.length?out:['compelling storytelling','strong performances'];}
+function getThemes(genres,id){const out=[];for(const g of genres){const opts=THEME_OPTS[g];if(opts){out.push(opts[id%opts.length]);if(out.length>=3)break;}}return out.length?out:['✨ compelling storytelling','🎭 strong performances'];}
 
 function matchScore(movie,queryText){
   let score=0,weight=0;
@@ -1389,7 +1388,10 @@ async function openDetail(movie){
   const lbLink=`<a class="detail-ext-link" href="https://letterboxd.com/film/${lbSlug}/" target="_blank" rel="noopener">Letterboxd ↗</a>`;
 
   content.innerHTML=`
-    <div class="detail-stills">${stillsHtml}</div>
+    <div style="position:relative">
+      <div class="detail-stills">${stillsHtml}</div>
+      <button class="detail-close" id="detail-close">✕</button>
+    </div>
     <div class="detail-body">
       <div class="detail-title">${movie.title}</div>
       ${tagline?`<div class="detail-tagline">"${tagline}"</div>`:''}
@@ -1411,8 +1413,9 @@ async function openDetail(movie){
 function closeDetail(){
   document.getElementById('detail-modal').classList.remove('open');
 }
-document.getElementById('detail-close').addEventListener('click',closeDetail);
-document.getElementById('detail-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeDetail();});
+document.getElementById('detail-modal').addEventListener('click',e=>{
+  if(e.target===e.currentTarget||e.target.id==='detail-close'||e.target.closest('#detail-close'))closeDetail();
+});
 
 document.addEventListener('click',e=>{
   const card=e.target.closest('.rec-card');
