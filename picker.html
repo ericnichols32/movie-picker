@@ -226,6 +226,50 @@ section { margin-bottom: 30px; }
 .lb-pill { background: rgba(0,224,84,0.12); color: #00e054; }
 .rating-denom { font-size: 10px; font-weight: 500; opacity: 0.7; }
 .detail-loading { padding: 48px; text-align: center; color: var(--muted); font-size: 13px; }
+#detail-content { overflow: hidden; } /* new BFC clears float from close button, fixes stills width */
+
+/* ── Reviews button + modal ── */
+.reviews-btn { font-size: 12px; font-weight: 700; color: #22c55e; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background 0.15s, border-color 0.15s; white-space: nowrap; }
+.reviews-btn:hover { background: rgba(34,197,94,0.2); border-color: #22c55e; }
+.reviews-modal { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.7); align-items: flex-start; justify-content: center; padding: 60px 16px 16px; }
+.reviews-modal.open { display: flex; }
+.reviews-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 480px; overflow: hidden; }
+.reviews-panel-hd { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 12px; border-bottom: 1px solid var(--border); }
+.reviews-panel-title { font-size: 14px; font-weight: 700; }
+.reviews-body { padding: 14px; display: flex; flex-direction: column; gap: 11px; max-height: 72vh; overflow-y: auto; }
+.reviews-upload-area { border: 1.5px dashed var(--border); border-radius: 10px; padding: 18px 12px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+.reviews-upload-area:hover,.reviews-upload-area.active { border-color: var(--accent); }
+.reviews-upload-hint { font-size: 12px; color: var(--sub); margin-top: 4px; }
+.reviews-img-preview { width: 100%; border-radius: 8px; display: none; margin-bottom: 2px; }
+.reviews-field-label { font-size: 9px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 4px; }
+.reviews-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; padding: 8px 10px; font-family: inherit; box-sizing: border-box; }
+.reviews-input:focus,.reviews-textarea:focus { outline: none; border-color: var(--accent); }
+.reviews-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; padding: 8px 10px; font-family: inherit; resize: vertical; min-height: 72px; box-sizing: border-box; }
+.reviews-row { display: flex; gap: 8px; }
+.reviews-row .reviews-input { flex: 1; }
+.reviews-stars { display: flex; gap: 4px; }
+.reviews-star { font-size: 24px; cursor: pointer; color: var(--border); transition: color 0.1s; }
+.reviews-star.on { color: #22c55e; }
+.reviews-save-btn { width: 100%; padding: 10px; font-size: 13px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 8px; cursor: pointer; }
+.reviews-save-btn:hover { background: #3a73f0; }
+.reviews-divider { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; text-align: center; margin: 4px 0; }
+.reviews-list { display: flex; flex-direction: column; gap: 8px; }
+.reviews-entry { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; }
+.reviews-entry-info { flex: 1; min-width: 0; }
+.reviews-entry-title { font-size: 13px; font-weight: 700; }
+.reviews-entry-meta { font-size: 11px; color: var(--sub); margin-top: 1px; }
+.reviews-entry-text { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reviews-del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 0; line-height: 1; flex-shrink: 0; }
+
+/* ── Watchlist screenshot toggle ── */
+.search-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.search-tab { flex: 1; padding: 9px; font-size: 12px; font-weight: 700; color: var(--muted); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+.search-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.search-shot-area { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.search-shot-upload { border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+.search-shot-upload:hover { border-color: var(--accent); }
+.search-shot-img { width: 100%; border-radius: 8px; display: none; }
+.search-shot-add { width: 100%; padding: 9px; font-size: 13px; font-weight: 700; color: #fff; background: var(--accent); border: none; border-radius: 8px; cursor: pointer; }
 .detail-rating-pill { text-decoration: none; }
 .refresh-row { display: flex; justify-content: center; margin-top: 14px; }
 .refresh-btn { font-size: 11px; font-weight: 700; color: var(--muted); background: none; border: 1px solid var(--border); padding: 6px 16px; border-radius: 20px; cursor: pointer; transition: border-color 0.15s, color 0.15s; letter-spacing: 0.5px; }
@@ -356,7 +400,10 @@ section { margin-bottom: 30px; }
 <div class="app-bar">
   <div class="app-bar-top">
     <div class="logo"><div class="logo-dot"></div>Eric's Movie Picker</div>
-    <button class="watchlist-btn" id="watchlist-btn">+ Watchlist</button>
+    <div style="display:flex;gap:8px">
+      <button class="reviews-btn" id="reviews-btn">+ Reviews</button>
+      <button class="watchlist-btn" id="watchlist-btn">+ Watchlist</button>
+    </div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" data-tab="mood">Mood &amp; Vibe</button>
@@ -484,15 +531,82 @@ section { margin-bottom: 30px; }
   </div>
 </div>
 
+<!-- Reviews modal -->
+<div class="reviews-modal" id="reviews-modal">
+  <div class="reviews-panel">
+    <div class="reviews-panel-hd">
+      <div class="reviews-panel-title">📝 Add Review</div>
+      <button class="search-close" id="reviews-close">✕</button>
+    </div>
+    <div class="reviews-body">
+      <label for="reviews-file" style="cursor:pointer">
+        <div class="reviews-upload-area" id="reviews-upload-area">
+          <div>📷 Tap to upload or paste a screenshot</div>
+          <div class="reviews-upload-hint">Optional — just for reference while you write</div>
+        </div>
+      </label>
+      <input type="file" id="reviews-file" accept="image/*" style="display:none">
+      <img class="reviews-img-preview" id="reviews-img-preview" alt="">
+      <div>
+        <div class="reviews-field-label">Movie Title</div>
+        <input class="reviews-input" id="reviews-title" type="text" placeholder="e.g. The Handmaiden">
+      </div>
+      <div class="reviews-row">
+        <div style="flex:1">
+          <div class="reviews-field-label">Year</div>
+          <input class="reviews-input" id="reviews-year" type="text" placeholder="2016">
+        </div>
+        <div style="flex:2">
+          <div class="reviews-field-label">Your Rating</div>
+          <div class="reviews-stars" id="reviews-stars">
+            <span class="reviews-star" data-i="0">★</span>
+            <span class="reviews-star" data-i="1">★</span>
+            <span class="reviews-star" data-i="2">★</span>
+            <span class="reviews-star" data-i="3">★</span>
+            <span class="reviews-star" data-i="4">★</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="reviews-field-label">Your Review / Notes</div>
+        <textarea class="reviews-textarea" id="reviews-review" placeholder="What did you think? This gets used as the write-up when the movie is recommended…"></textarea>
+      </div>
+      <button class="reviews-save-btn" id="reviews-save-btn">Save Review</button>
+      <div class="reviews-divider">Saved Reviews</div>
+      <div class="reviews-list" id="reviews-list"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Search overlay -->
 <div class="search-overlay" id="search-overlay">
   <div class="search-panel">
-    <div class="search-header">
-      <input class="search-input" id="search-input" type="text" placeholder="Search for a movie…" autocomplete="off">
-      <button class="search-close" id="search-close">✕</button>
+    <div class="search-tabs">
+      <button class="search-tab active" id="search-tab-text">🔍 Search</button>
+      <button class="search-tab" id="search-tab-shot">📷 Screenshot</button>
     </div>
-    <div class="search-results" id="search-results">
-      <div class="search-placeholder">Start typing to search…</div>
+    <div id="search-text-area">
+      <div class="search-header">
+        <input class="search-input" id="search-input" type="text" placeholder="Search for a movie…" autocomplete="off">
+        <button class="search-close" id="search-close">✕</button>
+      </div>
+      <div class="search-results" id="search-results">
+        <div class="search-placeholder">Start typing to search…</div>
+      </div>
+    </div>
+    <div class="search-shot-area" id="search-shot-area" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;color:var(--sub)">Upload a screenshot to reference</span>
+        <button class="search-close" id="search-close-shot">✕</button>
+      </div>
+      <label for="search-file" style="cursor:pointer">
+        <div class="search-shot-upload" id="search-shot-upload">📷 Tap to upload or paste screenshot</div>
+      </label>
+      <input type="file" id="search-file" accept="image/*" style="display:none">
+      <img class="search-shot-img" id="search-shot-img" alt="">
+      <input class="reviews-input" id="search-shot-title" type="text" placeholder="Movie title…">
+      <input class="reviews-input" id="search-shot-year" type="text" placeholder="Year (optional)">
+      <button class="search-shot-add" id="search-shot-add">Search &amp; Add to Watchlist</button>
     </div>
   </div>
 </div>
@@ -1231,6 +1345,7 @@ async function addToWatchlist(movie){
 }
 
 document.getElementById('watchlist-btn').addEventListener('click',()=>{
+  switchSearchTab('text');
   searchMode='watchlist';
   document.getElementById('search-overlay').classList.add('open');
   document.getElementById('search-input').value='';
@@ -1306,8 +1421,148 @@ document.addEventListener('click',e=>{
   }
 });
 
+// ── Reviews modal ──
+const USER_REVIEWS_KEY='user_reviews_v1';
+function loadUserReviews(){
+  const reviews=cg(USER_REVIEWS_KEY)||[];
+  for(const r of reviews){if(r.title&&r.review)FILM_DB[r.title]=r.review;}
+}
+
+function renderReviewsList(){
+  const reviews=cg(USER_REVIEWS_KEY)||[];
+  const el=document.getElementById('reviews-list');
+  if(!reviews.length){el.innerHTML='<div class="search-placeholder" style="padding:8px 0;color:var(--muted);font-size:12px">No reviews saved yet.</div>';return;}
+  el.innerHTML=reviews.map((r,i)=>`
+    <div class="reviews-entry">
+      <div class="reviews-entry-info">
+        <div class="reviews-entry-title">${r.title}${r.year?` (${r.year})`:''}</div>
+        <div class="reviews-entry-meta">${r.rating?'★'.repeat(r.rating)+'<span style="color:var(--muted)">★'.repeat(5-r.rating)+'</span> &nbsp;':''}</div>
+        ${r.review?`<div class="reviews-entry-text">${r.review.slice(0,100)}${r.review.length>100?'…':''}</div>`:''}
+      </div>
+      <button class="reviews-del-btn" onclick="deleteReview(${i})">×</button>
+    </div>`).join('');
+}
+
+function deleteReview(i){
+  const reviews=cg(USER_REVIEWS_KEY)||[];
+  reviews.splice(i,1);
+  cs(USER_REVIEWS_KEY,reviews);
+  // Rebuild FILM_DB from remaining
+  loadUserReviews();
+  renderReviewsList();
+}
+
+let reviewStars=0;
+function openReviewsModal(){
+  document.getElementById('reviews-modal').classList.add('open');
+  renderReviewsList();
+}
+function closeReviewsModal(){document.getElementById('reviews-modal').classList.remove('open');}
+
+document.getElementById('reviews-btn').addEventListener('click',openReviewsModal);
+document.getElementById('reviews-close').addEventListener('click',closeReviewsModal);
+document.getElementById('reviews-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeReviewsModal();});
+
+document.querySelectorAll('.reviews-star').forEach((star,i)=>{
+  star.addEventListener('click',()=>{
+    reviewStars=i+1;
+    document.querySelectorAll('.reviews-star').forEach((s,j)=>s.classList.toggle('on',j<=i));
+  });
+});
+
+document.getElementById('reviews-file').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{const img=document.getElementById('reviews-img-preview');img.src=ev.target.result;img.style.display='block';document.getElementById('reviews-upload-area').classList.add('active');};
+  reader.readAsDataURL(file);
+});
+
+document.addEventListener('paste',e=>{
+  if(!document.getElementById('reviews-modal').classList.contains('open'))return;
+  for(const item of e.clipboardData?.items||[]){
+    if(item.type.startsWith('image/')){
+      const reader=new FileReader();
+      reader.onload=ev=>{const img=document.getElementById('reviews-img-preview');img.src=ev.target.result;img.style.display='block';};
+      reader.readAsDataURL(item.getAsFile());break;
+    }
+  }
+});
+
+document.getElementById('reviews-save-btn').addEventListener('click',()=>{
+  const title=document.getElementById('reviews-title').value.trim();
+  if(!title){showToast('Enter a movie title');return;}
+  const year=document.getElementById('reviews-year').value.trim();
+  const review=document.getElementById('reviews-review').value.trim();
+  const entry={title,year,rating:reviewStars,review};
+  const reviews=cg(USER_REVIEWS_KEY)||[];
+  // Replace existing entry for same title if any
+  const existing=reviews.findIndex(r=>r.title.toLowerCase()===title.toLowerCase());
+  if(existing>=0)reviews.splice(existing,1);
+  reviews.unshift(entry);
+  cs(USER_REVIEWS_KEY,reviews);
+  if(review)FILM_DB[title]=review;
+  document.getElementById('reviews-title').value='';
+  document.getElementById('reviews-year').value='';
+  document.getElementById('reviews-review').value='';
+  document.getElementById('reviews-img-preview').style.display='none';
+  document.getElementById('reviews-upload-area').classList.remove('active');
+  reviewStars=0;
+  document.querySelectorAll('.reviews-star').forEach(s=>s.classList.remove('on'));
+  renderReviewsList();
+  showToast(`✓ Review saved for ${title}`);
+});
+
+// ── Watchlist screenshot tab ──
+function switchSearchTab(tab){
+  document.getElementById('search-text-area').style.display=tab==='text'?'block':'none';
+  document.getElementById('search-shot-area').style.display=tab==='shot'?'flex':'none';
+  document.getElementById('search-tab-text').classList.toggle('active',tab==='text');
+  document.getElementById('search-tab-shot').classList.toggle('active',tab==='shot');
+}
+document.getElementById('search-tab-text').addEventListener('click',()=>switchSearchTab('text'));
+document.getElementById('search-tab-shot').addEventListener('click',()=>{switchSearchTab('shot');});
+document.getElementById('search-close-shot').addEventListener('click',()=>document.getElementById('search-overlay').classList.remove('open'));
+
+document.getElementById('search-file').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{const img=document.getElementById('search-shot-img');img.src=ev.target.result;img.style.display='block';};
+  reader.readAsDataURL(file);
+});
+
+document.addEventListener('paste',e=>{
+  if(!document.getElementById('search-overlay').classList.contains('open'))return;
+  if(document.getElementById('search-shot-area').style.display==='none')return;
+  for(const item of e.clipboardData?.items||[]){
+    if(item.type.startsWith('image/')){
+      const reader=new FileReader();
+      reader.onload=ev=>{const img=document.getElementById('search-shot-img');img.src=ev.target.result;img.style.display='block';};
+      reader.readAsDataURL(item.getAsFile());break;
+    }
+  }
+},true);
+
+document.getElementById('search-shot-add').addEventListener('click',async()=>{
+  const title=document.getElementById('search-shot-title').value.trim();
+  const year=document.getElementById('search-shot-year').value.trim();
+  if(!title){showToast('Enter a movie title first');return;}
+  const btn=document.getElementById('search-shot-add');
+  btn.textContent='Searching…';btn.disabled=true;
+  const s=await searchTMDB(title,year?parseInt(year):null);
+  btn.textContent='Search & Add to Watchlist';btn.disabled=false;
+  if(!s){showToast('Movie not found — check the title');return;}
+  document.getElementById('search-overlay').classList.remove('open');
+  switchSearchTab('text');
+  document.getElementById('search-shot-title').value='';
+  document.getElementById('search-shot-year').value='';
+  document.getElementById('search-shot-img').style.display='none';
+  addFromSearch(s);
+});
+
+
 // ── Boot ──
 document.getElementById('stream-picks').innerHTML=skels(5);
+loadUserReviews();
 loadWatchlist();
 updateLibBar();
 </script>
