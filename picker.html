@@ -72,6 +72,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; back
 /* ── Filters shared ── */
 .filter-block { display: flex; flex-direction: column; gap: 9px; }
 .filter-label { font-size: 10px; font-weight: 700; letter-spacing: 1.3px; color: var(--muted); text-transform: uppercase; }
+.filter-label-row { display: flex; align-items: center; justify-content: space-between; }
+.clear-btn { font-size: 10px; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
+.clear-btn:hover { color: var(--sub); }
 .pills { display: flex; flex-wrap: wrap; gap: 7px; }
 .mood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .pill {
@@ -109,9 +112,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; back
 /* ── Main results area ── */
 .main { padding: 18px 16px; }
 .status-msg { font-size: 13px; color: var(--sub); margin-bottom: 14px; min-height: 18px; }
-.section-hd { margin-bottom: 12px; }
-.section-title { font-size: 10px; font-weight: 700; letter-spacing: 1.4px; color: var(--muted); text-transform: uppercase; }
-.section-sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+.section-hd { margin-bottom: 14px; }
+.section-title { font-size: 18px; font-weight: 800; color: var(--text); }
+.section-sub { font-size: 12px; color: var(--sub); margin-top: 3px; }
 section { margin-bottom: 30px; }
 .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 
@@ -119,6 +122,7 @@ section { margin-bottom: 30px; }
 .rec-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
   overflow: hidden; margin-bottom: 12px; transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 .card-body { display: flex; overflow: hidden; }
 .rec-rank {
@@ -139,6 +143,7 @@ section { margin-bottom: 30px; }
 .rec-title { font-size: 14px; font-weight: 700; line-height: 1.25; }
 .rec-meta { font-size: 11px; color: var(--sub); margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .stream-pill { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; color: #fff; text-transform: uppercase; letter-spacing: 0.3px; }
+.rent-pill { background: transparent !important; border: 1px solid #f59e0b; color: #f59e0b !important; }
 .rec-match-block { text-align: right; flex-shrink: 0; }
 .rec-match { font-size: 22px; font-weight: 800; line-height: 1; }
 .match-label { font-size: 8px; font-weight: 600; letter-spacing: 0.8px; color: var(--muted); }
@@ -146,6 +151,86 @@ section { margin-bottom: 30px; }
 .theme-tag { font-size: 10px; color: var(--sub); background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px; }
 .rec-writeup { font-size: 12px; color: var(--sub); line-height: 1.6; }
 .rec-writeup em { color: var(--text); font-style: normal; font-weight: 600; }
+.view-more-btn {
+  display: inline-flex; align-items: center; gap: 4px; align-self: flex-start;
+  font-size: 10px; font-weight: 700; color: var(--muted); cursor: pointer;
+  background: none; border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px; transition: border-color 0.15s, color 0.15s;
+}
+.view-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Detail modal ── */
+.detail-modal {
+  display: none; position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,0.75); align-items: center; justify-content: center;
+  padding: 20px;
+}
+.detail-modal.open { display: flex; }
+.detail-panel {
+  background: var(--panel); border-radius: 16px;
+  width: 100%; max-width: 600px; max-height: 88vh;
+  overflow-y: auto; position: relative;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+}
+.detail-close {
+  position: sticky; top: 0; float: right; margin: 14px 14px 0 0;
+  background: rgba(0,0,0,0.5); border: none; color: #fff;
+  width: 30px; height: 30px; border-radius: 50%; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;
+}
+.detail-stills {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 2px;
+  height: 160px; background: var(--card2); border-radius: 16px 16px 0 0; overflow: hidden;
+}
+.detail-stills img { width:100%; height:100%; object-fit:cover; display:block; }
+.detail-still-ph { background: var(--card2); height: 100%; animation: shimmer 1.8s infinite; background: linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%); background-size:400% 100%; }
+.detail-body { padding: 18px 18px 32px; }
+.detail-title { font-size: 20px; font-weight: 800; line-height: 1.2; margin-bottom: 4px; }
+.detail-tagline { font-size: 13px; color: var(--sub); font-style: italic; margin-bottom: 12px; }
+.detail-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: var(--sub); margin-bottom: 14px; }
+.detail-stat-dot { color: var(--muted); }
+.detail-rating { font-size: 13px; font-weight: 700; color: var(--green); }
+.detail-section-label { font-size: 9px; font-weight: 800; letter-spacing: 1.2px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; margin-top: 16px; }
+.detail-crew { font-size: 13px; color: var(--text); font-weight: 600; }
+.detail-cast { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.cast-chip { font-size: 11px; color: var(--sub); background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 3px 9px; border-radius: 20px; }
+.detail-overview { font-size: 13px; color: var(--sub); line-height: 1.7; }
+.detail-streaming { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+.detail-stream-pill { font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 6px; color: #fff; }
+.detail-rent-pill { font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 6px; border: 1px solid #f59e0b; color: #f59e0b; background: transparent; }
+/* ── Library status bar ── */
+.lib-bar { margin-top: 4px; padding: 12px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
+.lib-build-btn { width: 100%; padding: 9px; font-size: 12px; font-weight: 700; color: var(--accent); background: rgba(79,120,241,0.1); border: 1px solid rgba(79,120,241,0.3); border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+.lib-build-btn:hover { background: rgba(79,120,241,0.2); }
+.lib-hint { font-size: 11px; color: var(--muted); line-height: 1.5; text-align: center; }
+.lib-count-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lib-count { font-size: 12px; font-weight: 700; color: var(--text); }
+.lib-age { font-size: 10px; color: var(--muted); }
+.lib-refresh-btn { font-size: 10px; font-weight: 700; color: var(--muted); background: none; border: 1px solid var(--border); padding: 3px 9px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+.lib-refresh-btn:hover { color: var(--sub); border-color: var(--sub); }
+
+/* ── Library progress modal ── */
+.lib-modal { display: none; position: fixed; inset: 0; z-index: 700; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; padding: 24px; }
+.lib-modal.open { display: flex; }
+.lib-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px; }
+.lib-panel-title { font-size: 16px; font-weight: 800; }
+.lib-panel-status { font-size: 13px; color: var(--sub); min-height: 20px; }
+.lib-progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.lib-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width 0.4s ease; }
+.lib-panel-sub { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+.detail-ratings { display: flex; gap: 8px; margin-bottom: 14px; }
+.detail-rating-pill { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+.imdb-pill { background: rgba(245,197,24,0.15); color: #f5c518; }
+.lb-pill { background: rgba(0,224,84,0.12); color: #00e054; }
+.rating-denom { font-size: 10px; font-weight: 500; opacity: 0.7; }
+.detail-loading { padding: 48px; text-align: center; color: var(--muted); font-size: 13px; }
+.detail-rating-pill { text-decoration: none; }
+.refresh-row { display: flex; justify-content: center; margin-top: 14px; }
+.refresh-btn { font-size: 11px; font-weight: 700; color: var(--muted); background: none; border: 1px solid var(--border); padding: 6px 16px; border-radius: 20px; cursor: pointer; transition: border-color 0.15s, color 0.15s; letter-spacing: 0.5px; }
+.refresh-btn:hover { border-color: var(--sub); color: var(--sub); }
+.refresh-btn:disabled { opacity: 0.4; cursor: default; }
 
 /* skeleton card */
 .skel-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; height: 240px; margin-bottom: 12px; overflow: hidden; }
@@ -286,16 +371,18 @@ section { margin-bottom: 30px; }
     <div class="sidebar-body" id="sidebar-body">
     <div class="sidebar-inner">
       <div class="filter-block">
-        <div class="filter-label">Mood</div>
+        <div class="filter-label-row"><div class="filter-label">Mood</div><button class="clear-btn" id="clear-btn">Clear</button></div>
         <div class="mood-grid" id="mood-pills">
           <button class="mood-pill" data-mood="fun"><span class="pill-emoji">😄</span>Fun &amp; Light</button>
-          <button class="mood-pill" data-mood="intense"><span class="pill-emoji">😤</span>Intense &amp; Gripping</button>
+          <button class="mood-pill" data-mood="intense"><span class="pill-emoji">🫣</span>Intense &amp; Gripping</button>
           <button class="mood-pill" data-mood="mind"><span class="pill-emoji">🌀</span>Mind-Bending</button>
-          <button class="mood-pill" data-mood="emotional"><span class="pill-emoji">💔</span>Emotional</button>
-          <button class="mood-pill" data-mood="action"><span class="pill-emoji">⚡</span>Action-Packed</button>
+          <button class="mood-pill" data-mood="romance"><span class="pill-emoji">💗</span>Romance</button>
+          <button class="mood-pill" data-mood="action"><span class="pill-emoji">🧨</span>Action-Packed</button>
           <button class="mood-pill" data-mood="arthouse"><span class="pill-emoji">🎨</span>Arthouse</button>
           <button class="mood-pill" data-mood="epic"><span class="pill-emoji">🏔️</span>Epic</button>
           <button class="mood-pill" data-mood="scifi"><span class="pill-emoji">🚀</span>Sci-Fi</button>
+          <button class="mood-pill" data-mood="thriller"><span class="pill-emoji">⚔️</span>Thriller</button>
+          <button class="mood-pill" data-mood="humor"><span class="pill-emoji">😂</span>Humor</button>
         </div>
       </div>
       <div class="filter-block">
@@ -309,10 +396,10 @@ section { margin-bottom: 30px; }
         <div class="filter-label">Anything Else?</div>
         <textarea class="query-box" id="query-text" placeholder="e.g. strong female lead, set in the past, slow burn thriller…"></textarea>
       </div>
-      <button class="btn-find" id="find-btn">Find My Movie</button>
+      <button class="btn-find" id="find-btn">See Recs</button>
+      <div id="lib-bar" class="lib-bar"></div>
       <div class="services-note">
-        <strong>Your streaming:</strong> Netflix · Disney+ · Max · Hulu · Prime (included) · Apple TV+ · Peacock<br><br>
-        Top 5 from your services. Discover section includes everything.
+        <strong>Your streaming:</strong> Netflix · Disney+ · Max · Hulu · Prime (included) · Apple TV+ · Peacock
       </div>
     </div>
     </div><!-- /sidebar-body -->
@@ -322,18 +409,18 @@ section { margin-bottom: 30px; }
     <div class="status-msg" id="status-1">Loading your watchlist…</div>
     <section>
       <div class="section-hd">
-        <div class="section-title">Top Picks For You</div>
-        <div class="section-sub">On your streaming services · matched to your taste</div>
+        <div class="section-title">From Your Watchlist</div>
       </div>
       <div id="stream-picks"></div>
+      <div class="refresh-row"><button class="refresh-btn" id="refresh-stream">↻ Refresh</button></div>
     </section>
     <hr class="divider">
     <section>
       <div class="section-hd">
-        <div class="section-title">Discover Beyond Your Watchlist</div>
-        <div class="section-sub">From anywhere — streaming, rental, or otherwise</div>
+        <div class="section-title">More Options</div>
       </div>
       <div id="disc-picks"></div>
+      <div class="refresh-row"><button class="refresh-btn" id="refresh-disc">↻ Refresh</button></div>
     </section>
   </div>
 </div>
@@ -353,7 +440,7 @@ section { margin-bottom: 30px; }
       <div class="filter-label">Anything Else?</div>
       <textarea class="query-box" id="match-query-mobile" placeholder="e.g. female director, set in Japan, slow burn…"></textarea>
     </div>
-    <button class="btn-find match-find-btn" id="match-find-mobile">Find My Movie</button>
+    <button class="btn-find match-find-btn" id="match-find-mobile">See Recs</button>
   </div>
 
   <!-- Desktop sidebar -->
@@ -369,7 +456,7 @@ section { margin-bottom: 30px; }
       <div class="filter-label">Anything Else?</div>
       <textarea class="query-box" id="match-query-desktop" placeholder="e.g. female director, set in Japan, slow burn…"></textarea>
     </div>
-    <button class="btn-find" id="match-find-desktop">Find My Movie</button>
+    <button class="btn-find" id="match-find-desktop">See Recs</button>
     <div class="services-note">
       <strong>Your streaming:</strong> Netflix · Disney+ · Max · Hulu · Prime · Apple TV+ · Peacock<br><br>
       Top 5 from your services. Discover section includes everything.
@@ -381,18 +468,18 @@ section { margin-bottom: 30px; }
     <div class="status-msg" id="status-2"></div>
     <section>
       <div class="section-hd">
-        <div class="section-title">Top Picks For You</div>
-        <div class="section-sub">On your streaming services · based on your selections</div>
+        <div class="section-title">From Your Watchlist</div>
       </div>
       <div id="match-stream-picks"><div class="empty-msg">Select a movie above to get started</div></div>
+      <div class="refresh-row"><button class="refresh-btn" id="refresh-match-stream">↻ Refresh</button></div>
     </section>
     <hr class="divider">
     <section>
       <div class="section-hd">
-        <div class="section-title">Discover Beyond Your Watchlist</div>
-        <div class="section-sub">From anywhere — streaming, rental, or otherwise</div>
+        <div class="section-title">More Options</div>
       </div>
       <div id="match-disc-picks"></div>
+      <div class="refresh-row"><button class="refresh-btn" id="refresh-match-disc">↻ Refresh</button></div>
     </section>
   </div>
 </div>
@@ -410,6 +497,24 @@ section { margin-bottom: 30px; }
   </div>
 </div>
 
+<!-- Library build modal -->
+<div class="lib-modal" id="lib-modal">
+  <div class="lib-panel">
+    <div class="lib-panel-title">Building Movie Library</div>
+    <div class="lib-panel-status" id="lib-modal-status">Starting…</div>
+    <div class="lib-progress-track"><div class="lib-progress-fill" id="lib-progress-fill"></div></div>
+    <div class="lib-panel-sub">This runs once and takes 2–4 minutes. Future searches will instantly draw from thousands of movies instead of dozens. You can leave the app open while it runs.</div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="detail-modal" id="detail-modal">
+  <div class="detail-panel" id="detail-panel">
+    <button class="detail-close" id="detail-close">✕</button>
+    <div id="detail-content"><div class="detail-loading">Loading…</div></div>
+  </div>
+</div>
+
 <script>
 const TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwN2U3ODEyODJkNzFjODAzYjI4MDAzNGVlZDJiMGU3MCIsIm5iZiI6MTc3NjYzNTE4NS4yOSwic3ViIjoiNjllNTRkMzE3MzM3MWU3NTFmODRmMzJmIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.dP4f3I8FGzsnYz3LFAw1Xb-NoKN2O5734Wp9wUUPgp8';
 const API='https://api.themoviedb.org/3';
@@ -418,7 +523,7 @@ const STILL='https://image.tmdb.org/t/p/w780';
 
 const MY_SERVICES=new Set([8,337,1899,15,9,350,386]);
 const SVC_META={8:{name:'Netflix',bg:'#e50914'},337:{name:'Disney+',bg:'#0b3d91'},1899:{name:'Max',bg:'#5822b4'},15:{name:'Hulu',bg:'#1ce783',color:'#000'},9:{name:'Prime',bg:'#00a8e1'},350:{name:'Apple TV+',bg:'#333'},386:{name:'Peacock',bg:'#e47b00'},531:{name:'Paramount+',bg:'#0064ff'}};
-const MOOD_GENRES={fun:[35,12,10751,10402],intense:[53,80,18,10752],mind:[878,9648,14,53],emotional:[18,10749,10402,99],action:[28,12,10752],arthouse:[18,36,99,9648],epic:[28,12,36,10752,878,14],scifi:[878,14,53,9648]};
+const MOOD_GENRES={fun:[35,12,10751,10402],intense:[53,80,18,10752],mind:[878,9648,14,53],romance:[10749,18,10402],action:[28,12,10752],arthouse:[18,36,99,9648],epic:[28,12,36,10752,878,14],scifi:[878,14,53,9648],thriller:[53,80,9648],humor:[35,10749,10751]};
 const ERIC_W={18:1.18,53:1.15,80:1.12,878:1.12,9648:1.1,10402:1.1,10749:1.08,35:1.05,14:1.07,27:1.0,16:1.02,28:0.94,12:0.96};
 const THEME_OPTS={28:['kinetic momentum','physical stakes','propulsive tension'],12:['grand adventure','mythic scale','sense of wonder'],16:['visual imagination','timeless storytelling','artistic vision'],35:['sharp wit','comic chemistry','genuine laughs'],80:['moral ambiguity','criminal psychology','gritty realism'],99:['raw human truth','investigative depth','real-world stakes'],18:['quiet devastation','character study','emotional weight'],14:['otherworldly wonder','dark mythology','magical realism'],27:['creeping dread','psychological terror','atmospheric horror'],10402:['soul in the music','rhythmic storytelling','emotional catharsis'],9648:['buried secrets','paranoid atmosphere','unraveling mystery'],10749:['forbidden longing','romantic tension','emotional intimacy'],878:['conceptual boldness','future dread','existential scale'],53:['mounting paranoia','cat-and-mouse','psychological warfare'],10752:['cost of war','raw heroism','moral reckoning'],36:['epic history','human legacy','historical weight']};
 const COMPS={53:{film:'Knives Out',trait:'sharp plotting and satisfying reveals'},80:{film:'Parasite',trait:'social tension wrapped in precise genre craft'},878:{film:'Blade Runner 2049',trait:'immersive world-building and philosophical weight'},18:{film:'The Social Network',trait:'razor-sharp writing and compelling character study'},27:{film:'Nosferatu',trait:'slow-build atmospheric dread that pays off completely'},10749:{film:'Before Sunset',trait:'quiet intimacy that hits harder than any explosion'},35:{film:'Booksmart',trait:'wit and characters you genuinely root for'},10402:{film:'La La Land',trait:'music that makes the emotions hit harder than dialogue alone'},14:{film:"Pan's Labyrinth",trait:'dark fantasy that says something real about being human'},28:{film:'Mad Max: Fury Road',trait:'kinetic action with actual ideas behind it'},16:{film:'Spider-Man: Across the Spider-Verse',trait:'visual ambition matched by emotional storytelling'},12:{film:'Raiders of the Lost Ark',trait:'pure adventure that never loses its sense of fun'},9648:{film:'The Grand Budapest Hotel',trait:'clever plotting wrapped in a beautifully distinctive world'}};
@@ -565,9 +670,15 @@ const FILM_DB={
 'Sinners':'Ryan Coogler made a vampire film that\'s also about the blues and the Great Migration. Michael B. Jordan in a dual role.',
 'Nosferatu':'Eggers\' most controlled film — every frame composed like a painting, the dread earned instead of manufactured.',
 };
-const MOOD_PHRASES={fun:'Looking for something genuinely fun',intense:'If you want to feel it',mind:"For something that'll stick in your head for days",emotional:"If you're ready to feel something real",action:'For pure momentum and kinetic energy',arthouse:'For something more deliberately and beautifully crafted',epic:'For a film that earns the word "epic"',scifi:'For real sci-fi with actual ideas behind it'};
+const MOOD_PHRASES={fun:'Looking for something genuinely fun',intense:'If you want to feel it',mind:"For something that'll stick in your head for days",romance:'For something that pulls at the heart',action:'For pure momentum and kinetic energy',arthouse:'For something more deliberately and beautifully crafted',epic:'For a film that earns the word "epic"',scifi:'For real sci-fi with actual ideas behind it',thriller:'For something that keeps you on edge',humor:'For something that actually makes you laugh'};
 
 const WATCHLIST=[{n:'Drive My Car',y:2021},{n:'Aftersun',y:2022},{n:'The Fabelmans',y:2022},{n:'Chungking Express',y:1994},{n:'Malignant',y:2021},{n:'Hereditary',y:2018},{n:'The Place Beyond the Pines',y:2012},{n:'Weathering with You',y:2019},{n:'Barry Lyndon',y:1975},{n:'Mandy',y:2018},{n:'Suzume',y:2022},{n:"Kiki's Delivery Service",y:1989},{n:'Lady Vengeance',y:2005},{n:'Suspiria',y:2018},{n:'The Invitation',y:2015},{n:'Akira',y:1988},{n:'Belle',y:2021},{n:'A Ghost Story',y:2017},{n:'Revenge',y:2017},{n:'Donnie Darko',y:2001},{n:'The Fall',y:2006},{n:'American Gangster',y:2007},{n:'Ran',y:1985},{n:'Moulin Rouge!',y:2001},{n:'Train to Busan',y:2016},{n:'The Lighthouse',y:2019},{n:'The Witch',y:2015},{n:'Possession',y:1981},{n:'Prisoners',y:2013},{n:'The Night Comes for Us',y:2018},{n:'There Will Be Blood',y:2007},{n:'West Side Story',y:2021},{n:"Rosemary's Baby",y:1968},{n:'Titane',y:2021},{n:'What We Do in the Shadows',y:2014},{n:'Paris Is Burning',y:1990},{n:'The Rocky Horror Picture Show',y:1975},{n:'My Neighbor Totoro',y:1988},{n:'Perfect Days',y:2023},{n:'Rye Lane',y:2023},{n:'Friday',y:1995},{n:'Crouching Tiger, Hidden Dragon',y:2000},{n:'Phantom Thread',y:2017},{n:'One Cut of the Dead',y:2017},{n:'From Dusk Till Dawn',y:1996},{n:'Ghost in the Shell',y:1995},{n:'Do the Right Thing',y:1989},{n:'Barbarian',y:2022},{n:"A Knight's Tale",y:2001},{n:'Crimson Peak',y:2015},{n:"One Flew Over the Cuckoo's Nest",y:1975},{n:'The Brothers Bloom',y:2008},{n:'The Wild Robot',y:2024},{n:'Ambulance',y:2022},{n:'In the Mood for Love',y:2000},{n:'Saint Maud',y:2019},{n:'2046',y:2004},{n:'Rebel Ridge',y:2024},{n:'Sorcerer',y:1977},{n:'The Thing',y:1982},{n:'The Outfit',y:2022},{n:'Bones and All',y:2022},{n:'The Apartment',y:1960},{n:'Brick',y:2005},{n:'Breathless',y:1960},{n:'Ben-Hur',y:1959},{n:'Paper Moon',y:1973},{n:'Eyes Wide Shut',y:1999},{n:'Raise the Red Lantern',y:1991},{n:'Malcolm X',y:1992},{n:'Hook',y:1991},{n:"L'Avventura",y:1960},{n:'Cloud Atlas',y:2012},{n:'City of God',y:2002},{n:'Mulholland Drive',y:2001},{n:'Paprika',y:2006},{n:'Kubo and the Two Strings',y:2016},{n:'Rush Hour',y:1998},{n:'Metropolis',y:1927},{n:'Tampopo',y:1985},{n:'Sound of Metal',y:2019},{n:'Attack the Block',y:2011},{n:'Memories of Murder',y:2003},{n:'The Umbrellas of Cherbourg',y:1964},{n:'Midnight Run',y:1988},{n:'Blink Twice',y:2024},{n:'How to Have Sex',y:2023},{n:'Steel Magnolias',y:1989},{n:'Stardust',y:2007},{n:'Gremlins',y:1984},{n:'Thirst',y:2009},{n:'The Evil Dead',y:1981},{n:'Out of Sight',y:1998},{n:'The Five Devils',y:2022},{n:'Turning Red',y:2022},{n:'Four Lions',y:2010},{n:'Birds of Prey',y:2020},{n:'Little Fish',y:2020}];
+// Recency map: index in WATCHLIST array = order added (higher = more recent)
+const WL_RECENCY=new Map(WATCHLIST.map((m,i)=>[m.n,i]));
+const WL_MAX=Math.max(1,WATCHLIST.length-1);
+// Session cooldown: tracks which watchlist IDs have been shown this session
+const shownWlIds=new Set();
+
 const RATED=new Set(["Guardians of the Galaxy","Boyhood","12 Years a Slave","The Dark Knight","The Avengers","Kill Bill: Vol. 1","Silver Linings Playbook","Se7en","The Dark Knight Rises","American Beauty","Memento","The Shawshank Redemption","Forrest Gump","Batman Begins","Toy Story 3","Kill Bill: Vol. 2","The Perks of Being a Wallflower","How to Train Your Dragon","Iron Man","Life of Pi","The Breakfast Club","Avatar","Hot Fuzz","The Usual Suspects","The Girl with the Dragon Tattoo","Harry Potter and the Deathly Hallows: Part 2","District 9","Catch Me If You Can","Star Trek","Ferris Bueller's Day Off","Kick-Ass","Spider-Man","Spider-Man 2","Zombieland","Monty Python and the Holy Grail","The Prestige","Blood Diamond","Rocky","Up in the Air","Toy Story","Minority Report","Shaun of the Dead","Pirates of the Caribbean: The Curse of the Black Pearl","Short Term 12","Black Swan","Before Midnight","Requiem for a Dream","Rush","Captain Phillips","Blue Jasmine","Annie Hall","Children of Men","The Lord of the Rings: The Two Towers","Pulp Fiction","The Lord of the Rings: The Return of the King","Gone Girl","Fight Club","Whiplash","Parasite","Joker","Interstellar","La La Land","The Wolf of Wall Street","Jojo Rabbit","Her","The Social Network","Django Unchained","1917","Blade Runner 2049","Us","Spider-Man: No Way Home","The Suicide Squad","Bo Burnham: Inside","Soul","The Queen's Gambit","The Trial of the Chicago 7","Get Out","Thor: Ragnarok","Coco","The Shape of Water","Roma","Eighth Grade","Vice","Free Solo","Captain America: Civil War","Spider-Man: Into the Spider-Verse","Everything Everywhere All at Once","Inception","John Wick","Avatar: The Way of Water","The Menu","Glass Onion","The Nice Guys","Sing Street","21 Jump Street","The Big Short","Kingsman: The Secret Service","Lady Bird","The Lego Movie","Superbad","The Hateful Eight","Inglourious Basterds","Star Wars: The Force Awakens","The Departed","The Incredibles","All Quiet on the Western Front","Pan's Labyrinth","Mission: Impossible – Fallout","Past Lives","Nimona","Puss in Boots: The Last Wish","Oppenheimer","Ex Machina","Elf","Saltburn","The Hunger Games: The Ballad of Songbirds & Snakes","Dungeons & Dragons: Honor Among Thieves","Juno","The Iron Claw","Good Grief","Oldboy","Moana","Bridesmaids","Dune","Dune: Part Two","Arrival","Godzilla Minus One","Love Lies Bleeding","Hit Man","The Green Knight","Gladiator","Twisters","Crazy, Stupid, Love.","Prometheus","Logan Lucky","The Batman","School of Rock","RRR","Call Me by Your Name","Challengers","Booksmart","Bullet Train","Bodies Bodies Bodies","Before Sunrise","Rogue One: A Star Wars Story","Wicked","The Northman","Harry Potter and the Prisoner of Azkaban","Harry Potter and the Goblet of Fire","Skyfall","Before Sunset","Furiosa: A Mad Max Saga","I Saw the TV Glow","Portrait of a Lady on Fire","Nosferatu","Conclave","Strange Darling","Petite Maman","No Country for Old Men","Ocean's Eleven","Chef","Ocean's Twelve","Mission: Impossible – Rogue Nation","Jurassic Park","Spider-Man: Across the Spider-Verse","Knives Out","One Battle After Another","Sinners","The Grand Budapest Hotel","Drive","Mad Max: Fury Road","The Handmaiden","Decision to Leave","Lawrence of Arabia","Casino Royale","No Time to Die","Perfect Blue","The Shining","The Young Girls of Rochefort","Monkey Man","Prey","It Follows","Raiders of the Lost Ark","The Empire Strikes Back","Mean Girls","Ratatouille","Fargo","Forgetting Sarah Marshall","Bad Boys: Ride or Die","Babylon","Barbie","John Wick: Chapter 4","Pearl","Midsommar","Encanto","Mission: Impossible – Dead Reckoning","Ocean's Thirteen","KPop Demon Hunters","Tangled","Mickey 17","Thunderbolts*","Superman","The Parent Trap","La Chimera","Luca","Companion","Avatar: Fire and Ash","The Talented Mr. Ripley","Moonstruck","Hoppers","Zootopia","Zootopia 2","F1","Y Tu Mamá También","Raw","Project Hail Mary"]);
 
 // ── TMDB helpers ──
@@ -581,6 +692,7 @@ async function movieDetail(id){const k=`md_${id}`;const c=cg(k);if(c)return c;co
 async function movieProviders(id){const k=`pv_${id}`;const c=cg(k);if(c!==null)return c;const d=await tmdb(`/movie/${id}/watch/providers`);const p=d?.results?.US||{};cs(k,p);return p;}
 async function movieStills(id){const k=`st_${id}`;const c=cg(k);if(c)return c;const d=await tmdb(`/movie/${id}/images`,{include_image_language:'en,null'});const s=(d?.backdrops||[]).slice(0,3).map(b=>b.file_path);cs(k,s);return s;}
 async function movieRecs(id){const k=`rc_${id}`;const c=cg(k);if(c)return c;const d=await tmdb(`/movie/${id}/recommendations`,{language:'en-US',page:1});if(d)cs(k,d);return d;}
+async function movieCredits(id){const k=`cr_${id}`;const c=cg(k);if(c)return c;const d=await tmdb(`/movie/${id}/credits`);if(d)cs(k,d);return d;}
 
 // ── Scoring & theming ──
 const F={moods:new Set(),runtimes:new Set()};
@@ -609,6 +721,11 @@ function matchScoreSeed(movie,seedGenres){
 
 function matchColor(p){return p>=93?'#22c55e':p>=85?'#84cc16':p>=78?'#f59e0b':'#f97316';}
 
+// Watchlist scoring helpers
+function wlRecencyBonus(movie){const idx=WL_RECENCY.get(movie.title)??0;return(idx/WL_MAX)*18;}
+function wlMoodStrength(movie){if(!F.moods.size)return 0;const mg=new Set([...F.moods].flatMap(x=>MOOD_GENRES[x]||[]));const ov=movie.genres.filter(g=>mg.has(g)).length;return ov>=3?18:ov===2?12:ov===1?4:0;}
+function wlComposite(movie,queryText){return matchScore(movie,queryText)+wlRecencyBonus(movie)+wlMoodStrength(movie)-(shownWlIds.has(movie.id)?50:0);}
+
 function writeUp(movie,queryText){
   const pitch=FILM_DB[movie.title];
   if(pitch)return pitch;
@@ -631,31 +748,33 @@ function writeUpSeed(movie,seedTitles){
   const comp=COMPS[movie.genres.find(x=>COMPS[x])];
   const seeds=seedTitles.filter(Boolean);
   if(comp){
-    if(seeds.length===1)return `Recommended off <em>${seeds[0]}</em> — shares that quality of ${comp.trait}.`;
     if(seeds.length===2)return `Sits between <em>${seeds[0]}</em> and <em>${seeds[1]}</em> in terms of ${comp.trait}.`;
-    return `Threads from all three of your picks run through this one — ${comp.trait} is the common element.`;
+    return `${comp.trait[0].toUpperCase()+comp.trait.slice(1)} is the common thread here.`;
   }
-  if(seeds.length===1)return `TMDB points here directly from <em>${seeds[0]}</em>. The connection is in the DNA.`;
-  return `Appears across recommendations for multiple of your picks. There\'s something here.`;
+  return `Shows up across recommendations for your picks — the connection is in the DNA.`;
 }
 
 // ── Card rendering ──
 function streamBadgesHtml(movie){
   const show=movie.providerDetails.filter(p=>SVC_META[p.provider_id]).slice(0,2);
-  return show.map(p=>{const s=SVC_META[p.provider_id];return`<span class="stream-pill" style="background:${s.bg};color:${s.color||'#fff'}">${s.name}</span>`;}).join('');
+  const badges=show.map(p=>{const s=SVC_META[p.provider_id];return`<span class="stream-pill" style="background:${s.bg};color:${s.color||'#fff'}">${s.name}</span>`;});
+  if(!badges.length){
+    const primeRent=(movie.rentProviders||[]).find(p=>p.provider_id===9);
+    if(primeRent)badges.push(`<span class="stream-pill rent-pill">Rent · Prime</span>`);
+  }
+  return badges.join('');
 }
 
 function cardHtml(movie,rank,isWatchlist,queryText,seedTitles){
-  const pct=seedTitles&&movie.score!=null?movie.score:matchScore(movie,queryText);
-  const color=matchColor(pct);
   const themes=getThemes(movie.genres,movie.id);
   const rt=movie.runtime>0?`${movie.runtime} min`:'';
   const wu=seedTitles?writeUpSeed(movie,seedTitles):writeUp(movie,queryText);
   const posterHtml=movie.poster?`<img class="rec-poster" src="${movie.poster}" alt="" loading="lazy">`:`<div class="rec-no-poster">🎬</div>`;
-  return`<div class="rec-card">
+  const movieData=JSON.stringify({id:movie.id,title:movie.title,year:movie.year,poster:movie.poster,vote:movie.vote,runtime:movie.runtime,genres:movie.genres,providerDetails:movie.providerDetails,rentProviders:movie.rentProviders||[]});
+  return`<div class="rec-card" data-movie='${movieData}'>
     <div class="card-body">
       <div class="rec-rank">${rank}</div>
-      <div class="rec-poster-wrap">${posterHtml}${isWatchlist?'<div class="watchlist-tag">Watchlist</div>':''}</div>
+      <div class="rec-poster-wrap">${posterHtml}</div>
       <div class="rec-info">
         <div class="rec-top">
           <div class="rec-title-block">
@@ -663,18 +782,16 @@ function cardHtml(movie,rank,isWatchlist,queryText,seedTitles){
             <div class="rec-title">${movie.title}</div>
             <div class="rec-meta">${movie.year}${rt?` · ${rt}`:''}${streamBadgesHtml(movie)}</div>
           </div>
-          <div class="rec-match-block">
-            <div class="rec-match" style="color:${color}">${pct}%</div>
-            <div class="match-label">MATCH</div>
-          </div>
         </div>
         <div class="rec-themes">${themes.map(t=>`<span class="theme-tag">${t}</span>`).join('')}</div>
         <div class="rec-writeup">${wu}</div>
+        <button class="view-more-btn">View More</button>
       </div>
     </div>
   </div>`;}
 
 function skels(n){return Array(n).fill(0).map(()=>`<div class="skel-card"><div class="skel-inner"></div></div>`).join('');}
+
 
 async function injectStills(container){
   const wraps=container.querySelectorAll('.stills-wrap[data-id]');
@@ -707,27 +824,120 @@ async function loadWatchlist(){
   renderTab1(document.getElementById('query-text').value);
 }
 
+const MY_PROVIDER_STR=[...MY_SERVICES].join('|');
+
+// ── Movie Library ──
+const LIB_KEY='mlib_v1';
+const LIB_TS_KEY='mlib_ts';
+let _lib=null;
+function getLib(){if(_lib)return _lib;_lib=cg(LIB_KEY);return _lib;}
+function saveLib(arr){_lib=arr;cs(LIB_KEY,arr);}
+
+function updateLibBar(){
+  const el=document.getElementById('lib-bar');
+  if(!el)return;
+  const lib=getLib();
+  const ts=cg(LIB_TS_KEY);
+  if(lib&&lib.length){
+    const days=ts?Math.floor((Date.now()-ts)/(86400000)):null;
+    const age=days===0?'today':days===1?'yesterday':`${days}d ago`;
+    el.innerHTML=`<div class="lib-count-row"><span class="lib-count">📚 ${lib.length.toLocaleString()} movies in library</span><span class="lib-age">Built ${age}</span></div><button class="lib-refresh-btn" id="lib-refresh-btn">↻ Rebuild</button>`;
+    document.getElementById('lib-refresh-btn').addEventListener('click',buildLibrary);
+  } else {
+    el.innerHTML=`<button class="lib-build-btn" id="lib-build-btn">⬇ Build Movie Library</button><div class="lib-hint">One-time setup · searches thousands of movies instantly</div>`;
+    document.getElementById('lib-build-btn').addEventListener('click',buildLibrary);
+  }
+}
+
+async function buildLibrary(){
+  const modal=document.getElementById('lib-modal');
+  const fill=document.getElementById('lib-progress-fill');
+  const status=document.getElementById('lib-modal-status');
+  modal.classList.add('open');
+  _lib=null;
+
+  const seenIds=new Set();
+  const raw=[];
+  const base={language:'en-US',include_adult:false,watch_region:'US',with_watch_providers:MY_PROVIDER_STR,with_watch_monetization_types:'flatrate','vote_count.gte':30};
+
+  async function sweep(extra,pages,label,p0,p1){
+    for(let pg=1;pg<=pages;pg++){
+      const d=await tmdb('/discover/movie',{...base,...extra,page:pg});
+      if(!d?.results?.length)break;
+      for(const m of d.results){if(!seenIds.has(m.id)&&m.vote_average>=5.0){seenIds.add(m.id);raw.push(m);}}
+      const pct=p0+(p1-p0)*(pg/pages);
+      fill.style.width=`${pct}%`;
+      status.textContent=`${label} — ${raw.length} found so far…`;
+      await sleep(55);
+    }
+  }
+
+  // Pass 1: popularity
+  await sweep({sort_by:'popularity.desc'},50,'Sweeping popular titles',0,22);
+  // Pass 2: top-rated
+  await sweep({sort_by:'vote_average.desc','vote_count.gte':300},25,'Sweeping top-rated titles',22,38);
+  // Pass 3: genre sweeps
+  const genreIds=[18,53,35,28,878,80,10749,9648,14,27,10402,16,12,36,36];
+  for(let i=0;i<genreIds.length;i++){
+    await sweep({sort_by:'popularity.desc',with_genres:genreIds[i]},6,`Genre sweep ${i+1}/${genreIds.length}`,38+i*((60-38)/genreIds.length),38+(i+1)*((60-38)/genreIds.length));
+  }
+
+  status.textContent=`Checking streaming for ${raw.length} movies…`;
+  fill.style.width='60%';
+
+  // Enrich: provider call per movie in batches of 8
+  const library=[];
+  for(let i=0;i<raw.length;i+=8){
+    const batch=raw.slice(i,i+8);
+    const res=await Promise.all(batch.map(async m=>{
+      const prov=await movieProviders(m.id);
+      const flatrate=(prov?.flatrate||[]).map(p=>p.provider_id);
+      if(!flatrate.some(id=>MY_SERVICES.has(id)))return null;
+      return{id:m.id,title:m.title,year:(m.release_date||'').slice(0,4),poster:m.poster_path?`${POSTER}${m.poster_path}`:null,genres:m.genre_ids||[],vote:m.vote_average||0,overview:(m.overview||'').slice(0,280),flatrate,providerDetails:(prov?.flatrate||[]).filter(p=>SVC_META[p.provider_id]).map(p=>({provider_id:p.provider_id,provider_name:p.provider_name})),rentProviders:(prov?.rent||[]).filter(p=>p.provider_id===9).map(p=>({provider_id:p.provider_id}))};
+    }));
+    library.push(...res.filter(Boolean));
+    const pct=60+((i+8)/raw.length)*38;
+    fill.style.width=`${Math.min(98,pct)}%`;
+    status.textContent=`Confirmed ${library.length} movies on your services…`;
+    await sleep(90);
+  }
+
+  saveLib(library);
+  cs(LIB_TS_KEY,Date.now());
+  fill.style.width='100%';
+  status.textContent=`✓ Done — ${library.length} movies ready`;
+  updateLibBar();
+  setTimeout(()=>modal.classList.remove('open'),2200);
+}
+
 async function fetchDiscover(){
+  // If library is built, return it directly — filtering by mood/runtime happens in renderTab1
+  const lib=getLib();
+  if(lib&&lib.length)return lib;
+
+  // Fallback: live TMDB discover (no library built yet)
   const genres=[...new Set([...F.moods].flatMap(m=>MOOD_GENRES[m]||[]))];
   const rtKey=[...F.runtimes][0]||'any';
-  const ck=`dv3_${genres.join(',')}_${rtKey}`;
+  const ck=`dv5_${genres.join(',')}_${rtKey}`;
   const cached=cg(ck);if(cached)return cached;
-  const params={language:'en-US',sort_by:'vote_average.desc','vote_count.gte':200,include_adult:false};
+  const params={language:'en-US',sort_by:'vote_average.desc','vote_count.gte':150,include_adult:false,watch_region:'US',with_watch_providers:MY_PROVIDER_STR,with_watch_monetization_types:'flatrate'};
   if(genres.length)params.with_genres=genres.join('|');
   if(F.runtimes.has('short'))params['with_runtime.lte']=100;
   else if(F.runtimes.has('medium'))params['with_runtime.lte']=130;
-  const seen=new Set([...RATED,...WATCHLIST.map(m=>m.n)]);
+  const seenTitles=new Set([...RATED,...WATCHLIST.map(m=>m.n)]);
   const raw=[];
-  for(let pg=1;pg<=5&&raw.length<40;pg++){
+  for(let pg=1;pg<=15;pg++){
     const d=await tmdb('/discover/movie',{...params,page:pg});
-    for(const m of d?.results||[]){if(!seen.has(m.title)&&m.vote_average>=6.5&&!raw.find(r=>r.id===m.id)){raw.push(m);}if(raw.length>=40)break;}
-    await sleep(60);
+    if(!d?.results?.length)break;
+    for(const m of d.results){if(!seenTitles.has(m.title)&&m.vote_average>=6.2&&!raw.find(r=>r.id===m.id))raw.push(m);}
+    if(raw.length>=200)break;
+    await sleep(40);
   }
   const enriched=[];
-  for(const m of raw.slice(0,20)){
-    const[det,prov]=await Promise.all([movieDetail(m.id),movieProviders(m.id)]);
-    enriched.push({id:m.id,title:m.title,year:(m.release_date||'').slice(0,4),poster:m.poster_path?`${POSTER}${m.poster_path}`:null,genres:m.genre_ids||[],runtime:det?.runtime||0,vote:m.vote_average||0,overview:m.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[]});
-    await sleep(40);
+  for(let i=0;i<Math.min(75,raw.length);i+=10){
+    const batch=raw.slice(i,i+10);
+    const res=await Promise.all(batch.map(async m=>{const prov=await movieProviders(m.id);return{id:m.id,title:m.title,year:(m.release_date||'').slice(0,4),poster:m.poster_path?`${POSTER}${m.poster_path}`:null,genres:m.genre_ids||[],runtime:0,vote:m.vote_average||0,overview:m.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[]};}));
+    enriched.push(...res);await sleep(60);
   }
   cs(ck,enriched);return enriched;
 }
@@ -736,23 +946,49 @@ function rtMatch(m){if(!F.runtimes.size||m.runtime===0)return true;const rt=m.ru
 function moodMatch(m){if(!F.moods.size)return true;const mg=new Set([...F.moods].flatMap(x=>MOOD_GENRES[x]||[]));return m.genres.some(g=>mg.has(g));}
 
 let lastDisc=null;
+let allWl1=[],allDisc1=[],wlPage1=0,discPage1=0,lastQ1='';
+
+function renderWl1(){
+  const sp=document.getElementById('stream-picks');
+  // Re-sort each render so cooldown penalty applies to newly-shown items
+  const sorted=allWl1.slice().sort((a,b)=>wlComposite(b,lastQ1)-wlComposite(a,lastQ1));
+  const slice=sorted.slice(0,5);
+  slice.forEach(m=>shownWlIds.add(m.id));
+  sp.innerHTML=slice.length?slice.map((m,i)=>cardHtml(m,i+1,true,lastQ1,null)).join(''):'<div class="empty-msg">No watchlist matches on your streaming services — try different filters.</div>';
+}
+function renderDisc1(){
+  const dp=document.getElementById('disc-picks');
+  const start=discPage1*5;
+  const slice=allDisc1.slice(start,start+5);
+  dp.innerHTML=slice.length?slice.map((m,i)=>cardHtml(m,i+1,false,lastQ1,null)).join(''):'<div class="empty-msg">No discover results — try different filters.</div>';
+}
 function renderTab1(queryText,discMovies){
   const sp=document.getElementById('stream-picks');
   const dp=document.getElementById('disc-picks');
   if(!loaded){sp.innerHTML=skels(5);dp.innerHTML=skels(5);return;}
   if(discMovies!==undefined)lastDisc=discMovies;
-  const q=queryText||'';
-  const streamCandidates=watchlistMovies.filter(m=>m.flatrate.some(id=>MY_SERVICES.has(id))&&rtMatch(m)&&moodMatch(m)).sort((a,b)=>matchScore(b,q)-matchScore(a,q)).slice(0,5);
-  sp.innerHTML=streamCandidates.length?streamCandidates.map((m,i)=>cardHtml(m,i+1,true,q,null)).join(''):'<div class="empty-msg">No watchlist matches on your streaming services — try different filters.</div>';
+  lastQ1=queryText||'';
+  wlPage1=0;
+  allWl1=watchlistMovies.filter(m=>m.flatrate.some(id=>MY_SERVICES.has(id))&&rtMatch(m)&&moodMatch(m));
+  renderWl1();
   if(lastDisc){
-    const scored=[...lastDisc].sort((a,b)=>matchScore(b,q)-matchScore(a,q)).slice(0,5);
-    dp.innerHTML=scored.length?scored.map((m,i)=>cardHtml(m,i+1,false,q,null)).join(''):'<div class="empty-msg">No discover results — try different filters.</div>';
+    discPage1=0;
+    allDisc1=[...lastDisc].sort((a,b)=>matchScore(b,lastQ1)-matchScore(a,lastQ1));
+    renderDisc1();
   }
 }
 
 // ── Tab 1 events ──
 document.querySelectorAll('#mood-pills .mood-pill').forEach(p=>p.addEventListener('click',()=>{p.classList.toggle('on');if(p.classList.contains('on'))F.moods.add(p.dataset.mood);else F.moods.delete(p.dataset.mood);}));
 document.querySelectorAll('#runtime-pills .pill').forEach(p=>p.addEventListener('click',()=>{document.querySelectorAll('#runtime-pills .pill').forEach(x=>{x.classList.remove('on');F.runtimes.delete(x.dataset.rt);});p.classList.add('on');F.runtimes.add(p.dataset.rt);}));
+
+document.getElementById('clear-btn').addEventListener('click',()=>{
+  document.querySelectorAll('#mood-pills .mood-pill').forEach(p=>{p.classList.remove('on');});
+  F.moods.clear();
+  document.querySelectorAll('#runtime-pills .pill').forEach(p=>{p.classList.remove('on');});
+  F.runtimes.clear();
+  document.getElementById('query-text').value='';
+});
 
 const findBtn=document.getElementById('find-btn');
 findBtn.addEventListener('click',async()=>{
@@ -762,7 +998,7 @@ findBtn.addEventListener('click',async()=>{
   const disc=await fetchDiscover();
   document.getElementById('status-1').textContent='';
   renderTab1(document.getElementById('query-text').value,disc);
-  findBtn.classList.remove('loading');findBtn.textContent='Find My Movie';
+  findBtn.classList.remove('loading');findBtn.textContent='See Recs';
 });
 
 document.getElementById('sidebar-toggle').addEventListener('click',()=>{
@@ -839,6 +1075,8 @@ document.getElementById('search-input').addEventListener('input',function(){
   },300);
 });
 
+let allWl2=[],allDisc2=[],wlPage2=0,discPage2=0,lastMatchQuery2='',lastSeedTitles2=[];
+
 async function runMatch(){
   const picks=seedData.filter(Boolean);
   if(!picks.length){alert('Add at least one movie first!');return;}
@@ -853,15 +1091,40 @@ async function runMatch(){
   const seen=new Set([...RATED,...WATCHLIST.map(m=>m.n),...picks.map(p=>p.title)]);
 
   // ── Fetch TMDB recs first so we can score watchlist against the actual rec pool ──
+  // ── Fetch 3 pages of TMDB recs per seed (3× bigger rec pool) ──
   const countMap=new Map();
   for(const p of picks){
-    const d=await movieRecs(p.id);
-    for(const m of d?.results||[]){
-      if(!countMap.has(m.id))countMap.set(m.id,{...m,seedMatches:0});
-      countMap.get(m.id).seedMatches++;
+    for(let pg=1;pg<=3;pg++){
+      const d=await tmdb(`/movie/${p.id}/recommendations`,{language:'en-US',page:pg});
+      for(const m of d?.results||[]){
+        if(!countMap.has(m.id))countMap.set(m.id,{...m,seedMatches:0});
+        countMap.get(m.id).seedMatches++;
+      }
+      await sleep(50);
     }
-    await sleep(80);
   }
+
+  // ── Supplement with library movies matching seed genres (instant if library built) ──
+  const lib=getLib();
+  if(lib&&lib.length){
+    for(const m of lib){
+      if(!countMap.has(m.id)&&m.genres.some(g=>seedGenres.has(g))){
+        countMap.set(m.id,{id:m.id,title:m.title,release_date:m.year+'-01-01',poster_path:null,genre_ids:m.genres,vote_average:m.vote,overview:m.overview,seedMatches:0,_libMovie:m});
+      }
+    }
+  } else {
+    // Fallback: live discover sweep
+    const genreParam=[...seedGenres].join('|');
+    if(genreParam){
+      for(let pg=1;pg<=8;pg++){
+        const d=await tmdb('/discover/movie',{language:'en-US',sort_by:'vote_average.desc','vote_count.gte':150,include_adult:false,with_genres:genreParam,watch_region:'US',with_watch_providers:MY_PROVIDER_STR,with_watch_monetization_types:'flatrate',page:pg});
+        if(!d?.results?.length)break;
+        for(const m of d.results){if(!countMap.has(m.id))countMap.set(m.id,{...m,seedMatches:0});}
+        await sleep(40);
+      }
+    }
+  }
+
   const recIds=new Set(countMap.keys());
 
   // ── Watchlist picks: must appear in TMDB rec pool OR have 2+ genre overlaps ──
@@ -873,27 +1136,67 @@ async function runMatch(){
     return{...m,score:inRecPool?Math.min(98,base+8):base};
   }).filter(Boolean).sort((a,b)=>b.score-a.score);
 
-  const streamPicks=wlScored.filter(m=>m.flatrate.some(id=>MY_SERVICES.has(id))).slice(0,5);
-  const streamIds=new Set(streamPicks.map(m=>m.id));
+  allWl2=wlScored.filter(m=>m.flatrate.some(id=>MY_SERVICES.has(id))).map(m=>({...m,_wl2Base:m.score+wlRecencyBonus(m)})).sort((a,b)=>b._wl2Base-a._wl2Base);
+  const streamIds=new Set(allWl2.map(m=>m.id));
+  wlPage2=0;
 
-  // ── Discover: TMDB recs excluding already-watched/watchlisted ──
-  const candidates=[...countMap.values()].filter(m=>!seen.has(m.title)).sort((a,b)=>(b.seedMatches-a.seedMatches)||(b.vote_average-a.vote_average)).slice(0,30);
-  const enriched=await Promise.all(candidates.map(async m=>{
-    const[det,prov]=await Promise.all([movieDetail(m.id),movieProviders(m.id)]);
-    return{id:m.id,title:m.title,year:(m.release_date||'').slice(0,4),poster:m.poster_path?`${POSTER}${m.poster_path}`:null,genres:m.genre_ids||[],runtime:det?.runtime||0,vote:m.vote_average||0,overview:m.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[],seedMatches:m.seedMatches};
-  }));
-  const discScored=enriched.map(m=>({...m,score:matchScoreSeed(m,seedGenres)})).sort((a,b)=>b.score-a.score);
-  const discPicks=discScored.filter(m=>!streamIds.has(m.id)).slice(0,5);
+  // ── Discover: enrich top 80 candidates in parallel batches ──
+  const candidates=[...countMap.values()].filter(m=>!seen.has(m.title)&&(m.vote_average||m.vote||0)>=6.2).sort((a,b)=>(b.seedMatches-a.seedMatches)||((b.vote_average||b.vote||0)-(a.vote_average||a.vote||0))).slice(0,80);
+  const enriched=[];
+  for(let i=0;i<candidates.length;i+=10){
+    const batch=candidates.slice(i,i+10);
+    const res=await Promise.all(batch.map(async m=>{
+      if(m._libMovie){
+        // Use cached library data — skip API call
+        const lm=m._libMovie;
+        return{...lm,seedMatches:m.seedMatches};
+      }
+      const prov=await movieProviders(m.id);
+      return{id:m.id,title:m.title,year:(m.release_date||'').slice(0,4),poster:m.poster_path?`${POSTER}${m.poster_path}`:null,genres:m.genre_ids||[],runtime:0,vote:m.vote_average||0,overview:m.overview||'',flatrate:(prov?.flatrate||[]).map(p=>p.provider_id),providerDetails:prov?.flatrate||[],rentProviders:prov?.rent||[],seedMatches:m.seedMatches};
+    }));
+    enriched.push(...res);
+    await sleep(60);
+  }
+  allDisc2=enriched.map(m=>({...m,score:matchScoreSeed(m,seedGenres)})).sort((a,b)=>b.score-a.score).filter(m=>!streamIds.has(m.id));
+  discPage2=0;
+  lastMatchQuery2=matchQuery;lastSeedTitles2=seedTitles;
 
   const sp=document.getElementById('match-stream-picks');
   const dp=document.getElementById('match-disc-picks');
-  sp.innerHTML=streamPicks.length?streamPicks.map((m,i)=>cardHtml(m,i+1,true,matchQuery,seedTitles)).join(''):'<div class="empty-msg">No watchlist matches on your streaming services.</div>';
-  dp.innerHTML=discPicks.length?discPicks.map((m,i)=>cardHtml(m,i+1,false,matchQuery,seedTitles)).join(''):'';
+  const wl2Sorted=allWl2.slice().sort((a,b)=>(b._wl2Base-(shownWlIds.has(b.id)?50:0))-(a._wl2Base-(shownWlIds.has(a.id)?50:0)));
+  const wl2Slice=wl2Sorted.slice(0,5);wl2Slice.forEach(m=>shownWlIds.add(m.id));
+  sp.innerHTML=wl2Slice.map((m,i)=>cardHtml(m,i+1,true,matchQuery,seedTitles)).join('')||'<div class="empty-msg">No watchlist matches on your streaming services.</div>';
+  dp.innerHTML=allDisc2.slice(0,5).map((m,i)=>cardHtml(m,i+1,false,matchQuery,seedTitles)).join('');
   st2.textContent='';
 }
 
 document.getElementById('match-find-mobile').addEventListener('click',runMatch);
 document.getElementById('match-find-desktop').addEventListener('click',runMatch);
+
+// ── Refresh buttons ──
+document.getElementById('refresh-stream').addEventListener('click',()=>{
+  if(!allWl1.length)return;
+  renderWl1(); // cooldown penalty in renderWl1 surfaces new picks automatically
+});
+document.getElementById('refresh-disc').addEventListener('click',()=>{
+  if(!allDisc1.length)return;
+  discPage1=(discPage1+1)*5>=allDisc1.length?0:discPage1+1;
+  renderDisc1();
+});
+document.getElementById('refresh-match-stream').addEventListener('click',()=>{
+  if(!allWl2.length)return;
+  const sp=document.getElementById('match-stream-picks');
+  const sorted=allWl2.slice().sort((a,b)=>(b._wl2Base-(shownWlIds.has(b.id)?50:0))-(a._wl2Base-(shownWlIds.has(a.id)?50:0)));
+  const slice=sorted.slice(0,5);slice.forEach(m=>shownWlIds.add(m.id));
+  sp.innerHTML=slice.length?slice.map((m,i)=>cardHtml(m,i+1,true,lastMatchQuery2,lastSeedTitles2)).join(''):'<div class="empty-msg">No more watchlist matches.</div>';
+});
+document.getElementById('refresh-match-disc').addEventListener('click',()=>{
+  if(!allDisc2.length)return;
+  discPage2=(discPage2+1)*5>=allDisc2.length?0:discPage2+1;
+  const dp=document.getElementById('match-disc-picks');
+  const slice=allDisc2.slice(discPage2*5,(discPage2+1)*5);
+  dp.innerHTML=slice.length?slice.map((m,i)=>cardHtml(m,i+1,false,lastMatchQuery2,lastSeedTitles2)).join(''):'<div class="empty-msg">No more discover results.</div>';
+});
 
 // ── Tab switching ──
 document.querySelectorAll('.tab-btn').forEach(btn=>{
@@ -936,9 +1239,77 @@ document.getElementById('watchlist-btn').addEventListener('click',()=>{
 });
 
 
+// ── Detail modal ──
+const SERVICE_COLORS={8:'#e50914',337:'#0080ff',9:'#00a8e1',384:'#1ce783',15:'#1ce783',386:'#5f2d91',387:'#f9a602',531:'#f5a623',283:'#00b4e4',2:'#005db4'};
+
+function svcColor(id){return SERVICE_COLORS[id]||'#555';}
+
+async function openDetail(movie){
+  const modal=document.getElementById('detail-modal');
+  const content=document.getElementById('detail-content');
+  modal.classList.add('open');
+  content.innerHTML='<div class="detail-loading">Loading…</div>';
+
+  const[det,credits,stills]=await Promise.all([
+    movieDetail(movie.id),
+    movieCredits(movie.id),
+    movieStills(movie.id)
+  ]);
+
+  const director=(credits?.crew||[]).find(c=>c.job==='Director');
+  const cast=(credits?.cast||[]).slice(0,4);
+  const tagline=det?.tagline||'';
+  const overview=det?.overview||movie.overview||'';
+  const runtime=det?.runtime||movie.runtime||0;
+  const vote=det?.vote_average||movie.vote||0;
+  const year=movie.year||(det?.release_date||'').slice(0,4);
+  const imdbId=det?.imdb_id||'';
+  const lbSlug=movie.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+  const stillsHtml=stills.length
+    ? stills.map(s=>`<img src="${STILL}${s}" alt="" loading="lazy">`).join('')
+    : Array(3).fill('<div class="detail-still-ph"></div>').join('');
+
+  const imdbLink=imdbId?`<a class="detail-ext-link" href="https://www.imdb.com/title/${imdbId}/" target="_blank" rel="noopener">IMDb ↗</a>`:'';
+  const lbLink=`<a class="detail-ext-link" href="https://letterboxd.com/film/${lbSlug}/" target="_blank" rel="noopener">Letterboxd ↗</a>`;
+
+  content.innerHTML=`
+    <div class="detail-stills">${stillsHtml}</div>
+    <div class="detail-body">
+      <div class="detail-title">${movie.title}</div>
+      ${tagline?`<div class="detail-tagline">"${tagline}"</div>`:''}
+      <div class="detail-stats">
+        <span>${year}</span>
+        ${runtime?`<span class="detail-stat-dot">·</span><span>${runtime} min</span>`:''}
+      </div>
+      ${vote?`<div class="detail-ratings">
+        ${imdbId?`<a class="detail-rating-pill imdb-pill" href="https://www.imdb.com/title/${imdbId}/" target="_blank" rel="noopener">IMDb ★ ${vote.toFixed(1)}<span class="rating-denom">/10</span></a>`:`<span class="detail-rating-pill imdb-pill">IMDb ★ ${vote.toFixed(1)}<span class="rating-denom">/10</span></span>`}
+        <a class="detail-rating-pill lb-pill" href="https://letterboxd.com/film/${lbSlug}/" target="_blank" rel="noopener">LB ★ ${(vote/2).toFixed(1)}<span class="rating-denom">/5</span></a>
+      </div>`:''}
+      ${(()=>{const svcs=(movie.providerDetails||[]).filter(p=>SVC_META[p.provider_id]);return svcs.length?`<div class="detail-ratings">${svcs.map(p=>{const s=SVC_META[p.provider_id];return`<span class="stream-pill" style="background:${s.bg};color:${s.color||'#fff'}">${s.name}</span>`;}).join('')}</div>`:''})()}
+      ${director?`<div class="detail-section-label">Director</div><div class="detail-crew">${director.name}</div>`:''}
+      ${cast.length?`<div class="detail-section-label">Cast</div><div class="detail-cast">${cast.map(a=>`<span class="cast-chip">${a.name}</span>`).join('')}</div>`:''}
+      ${overview?`<div class="detail-section-label">Overview</div><div class="detail-overview">${overview}</div>`:''}
+    </div>`;
+}
+
+function closeDetail(){
+  document.getElementById('detail-modal').classList.remove('open');
+}
+document.getElementById('detail-close').addEventListener('click',closeDetail);
+document.getElementById('detail-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeDetail();});
+
+document.addEventListener('click',e=>{
+  const card=e.target.closest('.rec-card');
+  if(card){
+    try{const movie=JSON.parse(card.dataset.movie);openDetail(movie);}catch(err){}
+  }
+});
+
 // ── Boot ──
 document.getElementById('stream-picks').innerHTML=skels(5);
 loadWatchlist();
+updateLibBar();
 </script>
 </body>
 </html>
