@@ -889,7 +889,12 @@ function matchColor(p){return p>=93?'#22c55e':p>=85?'#84cc16':p>=78?'#f59e0b':'#
 // Watchlist scoring helpers
 function wlRecencyBonus(movie){const idx=WL_RECENCY.get(movie.title)??0;return(idx/WL_MAX)*18;}
 function wlMoodStrength(movie){if(!F.moods.size)return 0;const mg=new Set([...F.moods].flatMap(x=>MOOD_GENRES[x]||[]));const ov=movie.genres.filter(g=>mg.has(g)).length;return ov>=3?18:ov===2?12:ov===1?4:0;}
-function wlComposite(movie,queryText){return matchScore(movie,queryText)+wlRecencyBonus(movie)+wlMoodStrength(movie)-(shownWlIds.has(movie.id)?50:0);}
+function wlComposite(movie,queryText){
+  const seriousMoods=new Set(['mind','intense','thriller','scifi','arthouse','epic']);
+  const hasSerious=[...F.moods].some(m=>seriousMoods.has(m));
+  const animPenalty=(hasSerious&&movie.genres.includes(16)&&!F.moods.has('fun'))?-30:0;
+  return matchScore(movie,queryText)+wlRecencyBonus(movie)+wlMoodStrength(movie)+animPenalty-(shownWlIds.has(movie.id)?50:0);
+}
 
 function writeUp(movie,queryText){
   const pitch=FILM_DB[movie.title];
@@ -1457,7 +1462,7 @@ async function openDetail(movie){
       </div>
       ${vote?`<div class="detail-ratings">
         ${imdbId?`<a class="detail-rating-pill imdb-pill" href="https://www.imdb.com/title/${imdbId}/" target="_blank" rel="noopener">IMDb ★ ${vote.toFixed(1)}<span class="rating-denom">/10</span></a>`:`<span class="detail-rating-pill imdb-pill">IMDb ★ ${vote.toFixed(1)}<span class="rating-denom">/10</span></span>`}
-        <a class="detail-rating-pill lb-pill" href="https://letterboxd.com/film/${lbSlug}/" target="_blank" rel="noopener">LB ★ ${(vote/2).toFixed(1)}<span class="rating-denom">/5</span></a>
+        <a class="detail-rating-pill lb-pill" href="https://letterboxd.com/film/${lbSlug}/" target="_blank" rel="noopener">Letterboxd ↗</a>
       </div>`:''}
       ${(()=>{const svcs=(movie.providerDetails||[]).filter(p=>SVC_META[p.provider_id]);return svcs.length?`<div class="detail-ratings">${svcs.map(p=>{const s=SVC_META[p.provider_id];return`<span class="stream-pill" style="background:${s.bg};color:${s.color||'#fff'}">${s.name}</span>`;}).join('')}</div>`:''})()}
       ${director?`<div class="detail-section-label">Director</div><div class="detail-crew">${director.name}</div>`:''}
