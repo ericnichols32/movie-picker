@@ -84,6 +84,47 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; back
 }
 .pill:hover { border-color: var(--accent); color: var(--text); }
 .pill.on { background: rgba(79,120,241,0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.pills-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.pills-3 .pill { font-size: 11px; padding: 6px 4px; text-align: center; }
+
+/* Collapsible filter sections */
+.filter-collapse { border-top: 1px solid var(--border); padding-top: 12px; }
+.filter-collapse-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; padding: 0; user-select: none;
+}
+.filter-collapse-hd .filter-label { margin: 0; }
+.filter-collapse-arrow { font-size: 12px; color: var(--muted); transition: transform 0.2s; display: inline-block; }
+.filter-collapse-arrow.open { transform: rotate(180deg); }
+.filter-collapse-body { display: none; padding-top: 10px; }
+.filter-collapse-body.open { display: block; }
+
+/* Rating filter */
+.rating-filter { display: flex; flex-direction: column; gap: 16px; }
+.rating-row { display: flex; flex-direction: column; gap: 8px; }
+.rating-label-row { display: flex; align-items: center; justify-content: space-between; }
+.rating-source-label { font-size: 11px; color: var(--sub); letter-spacing: 0.3px; }
+.rating-val { font-size: 12px; font-weight: 700; color: var(--accent); }
+.rating-slider {
+  width: 100%; -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer;
+}
+.rating-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: #f59e0b; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.rating-slider::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%; background: #f59e0b;
+  cursor: pointer; border: none; box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.lb-stars { display: flex; gap: 8px; touch-action: none; cursor: pointer; padding: 4px 0; }
+.lb-star { font-size: 28px; color: var(--border); transition: color 0.1s; line-height: 1; user-select: none; }
+.lb-star.filled { color: #00c030; }
+.service-checkboxes { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.service-check-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.service-check-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.service-check-label { font-size: 13px; color: var(--sub); }
 .mood-pill {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 14px 8px; gap: 6px; border-radius: 10px; border: 1px solid var(--border);
@@ -129,9 +170,9 @@ section { margin-bottom: 30px; }
   display: none; width: 34px; min-width: 34px; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 800; color: var(--muted); background: var(--panel); border-right: 1px solid var(--border);
 }
-.rec-poster-wrap { position: relative; flex-shrink: 0; }
-.rec-poster { width: 76px; height: 114px; object-fit: cover; display: block; background: var(--panel); }
-.rec-no-poster { width: 76px; height: 114px; background: var(--panel); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--muted); }
+.rec-poster-wrap { position: relative; flex-shrink: 0; align-self: stretch; }
+.rec-poster { width: 76px; height: 100%; min-height: 114px; object-fit: cover; display: block; background: var(--panel); }
+.rec-no-poster { width: 76px; height: 100%; min-height: 114px; background: var(--panel); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--muted); }
 .watchlist-tag {
   position: absolute; bottom: 5px; left: 5px; background: rgba(79,120,241,0.9); color: #fff;
   font-size: 7px; font-weight: 800; padding: 2px 5px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.4px;
@@ -385,8 +426,8 @@ section { margin-bottom: 30px; }
   .rec-card:hover { border-color: #3d4870; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
   .rec-rank { display: flex; }
   .rec-num { display: none; }
-  .rec-poster { width: 88px; height: 132px; }
-  .rec-no-poster { width: 88px; height: 132px; font-size: 28px; }
+  .rec-poster { width: 88px; }
+  .rec-no-poster { width: 88px; font-size: 28px; }
   .rec-info { padding: 13px 16px; }
   .rec-title { font-size: 15px; }
   .rec-match { font-size: 26px; }
@@ -434,9 +475,68 @@ section { margin-bottom: 30px; }
       </div>
       <div class="filter-block">
         <div class="filter-label">Runtime</div>
-        <div class="pills" id="runtime-pills">
-          <button class="pill" data-rt="short">⏱ 90 minutes</button>
-          <button class="pill" data-rt="medium">🎬 Under 2 hours</button>
+        <div class="pills-3" id="runtime-pills">
+          <button class="pill" data-rt="short">90 min or less</button>
+          <button class="pill" data-rt="medium">2 hours or less</button>
+          <button class="pill on" data-rt="any">Any length</button>
+        </div>
+      </div>
+      <div class="filter-block filter-collapse">
+        <div class="filter-collapse-hd" data-collapse="streaming">
+          <div class="filter-label">Streaming Platform</div>
+          <span class="filter-collapse-arrow" id="arr-streaming">▾</span>
+        </div>
+        <div class="filter-collapse-body" id="body-streaming">
+          <div class="pills-3" id="streaming-pills">
+            <button class="pill on" data-stream="my">My platforms</button>
+            <button class="pill" data-stream="any">Any</button>
+            <button class="pill" data-stream="select">Select</button>
+          </div>
+          <div id="service-select-panel" style="display:none;margin-top:10px">
+            <div class="service-checkboxes" id="service-checkboxes"></div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-block filter-collapse">
+        <div class="filter-collapse-hd" data-collapse="rating">
+          <div class="filter-label">Rating</div>
+          <span class="filter-collapse-arrow" id="arr-rating">▾</span>
+        </div>
+        <div class="filter-collapse-body" id="body-rating">
+          <div class="rating-filter">
+            <div class="rating-row">
+              <div class="rating-label-row">
+                <span class="rating-source-label">IMDb minimum</span>
+                <span class="rating-val" id="imdb-val">Any</span>
+              </div>
+              <input type="range" class="rating-slider" id="imdb-slider" min="0" max="10" step="1" value="0">
+            </div>
+            <div class="rating-row">
+              <div class="rating-label-row">
+                <span class="rating-source-label">Letterboxd minimum</span>
+                <span class="rating-val" id="lb-val">Any</span>
+              </div>
+              <div class="lb-stars" id="lb-stars">
+                <span class="lb-star" data-pos="1">★</span>
+                <span class="lb-star" data-pos="2">★</span>
+                <span class="lb-star" data-pos="3">★</span>
+                <span class="lb-star" data-pos="4">★</span>
+                <span class="lb-star" data-pos="5">★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-block filter-collapse">
+        <div class="filter-collapse-hd" data-collapse="rewatch">
+          <div class="filter-label">Rewatch</div>
+          <span class="filter-collapse-arrow" id="arr-rewatch">▾</span>
+        </div>
+        <div class="filter-collapse-body" id="body-rewatch">
+          <div class="pills-3" id="rewatch-pills" style="grid-template-columns:1fr 1fr">
+            <button class="pill" data-rw="unseen">Never seen</button>
+            <button class="pill on" data-rw="all">All movies</button>
+          </div>
         </div>
       </div>
       <div class="filter-block">
@@ -860,7 +960,7 @@ async function movieRecs(id){const k=`rc_${id}`;const c=cg(k);if(c)return c;cons
 async function movieCredits(id){const k=`cr_${id}`;const c=cg(k);if(c)return c;const d=await tmdb(`/movie/${id}/credits`);if(d)cs(k,d);return d;}
 
 // ── Scoring & theming ──
-const F={moods:new Set(),runtimes:new Set()};
+const F={moods:new Set(),runtimes:new Set(),streaming:'my',minImdb:0,minLb:0,rewatch:'all'};
 
 function getThemes(genres,id){const out=[];for(const g of genres){const opts=THEME_OPTS[g];if(opts){out.push(opts[id%opts.length]);if(out.length>=3)break;}}return out.length?out:['✨ compelling storytelling','🎭 strong performances'];}
 
@@ -894,6 +994,13 @@ function wlComposite(movie,queryText){
   const hasSerious=[...F.moods].some(m=>seriousMoods.has(m));
   const animPenalty=(hasSerious&&movie.genres.includes(16)&&!F.moods.has('fun'))?-30:0;
   return matchScore(movie,queryText)+wlRecencyBonus(movie)+wlMoodStrength(movie)+animPenalty-(shownWlIds.has(movie.id)?50:0);
+}
+
+function passesFilters(movie){
+  if(F.minImdb>0&&movie.vote<F.minImdb)return false;
+  if(F.minLb>0&&movie.vote<F.minLb*2)return false;
+  if(F.rewatch==='unseen'&&RATED.has(movie.title))return false;
+  return true;
 }
 
 function writeUp(movie,queryText){
@@ -1121,15 +1228,16 @@ let allWl1=[],allDisc1=[],wlPage1=0,discPage1=0,lastQ1='';
 function renderWl1(){
   const sp=document.getElementById('stream-picks');
   // Re-sort each render so cooldown penalty applies to newly-shown items
-  const sorted=allWl1.slice().sort((a,b)=>wlComposite(b,lastQ1)-wlComposite(a,lastQ1));
+  const sorted=allWl1.slice().filter(passesFilters).sort((a,b)=>wlComposite(b,lastQ1)-wlComposite(a,lastQ1));
   const slice=sorted.slice(0,5);
   slice.forEach(m=>shownWlIds.add(m.id));
   sp.innerHTML=slice.length?slice.map((m,i)=>cardHtml(m,i+1,true,lastQ1,null)).join(''):'<div class="empty-msg">No watchlist matches on your streaming services — try different filters.</div>';
 }
 function renderDisc1(){
   const dp=document.getElementById('disc-picks');
+  const filtered=allDisc1.filter(passesFilters);
   const start=discPage1*5;
-  const slice=allDisc1.slice(start,start+5);
+  const slice=filtered.slice(start,start+5);
   dp.innerHTML=slice.length?slice.map((m,i)=>cardHtml(m,i+1,false,lastQ1,null)).join(''):'<div class="empty-msg">No discover results — try different filters.</div>';
 }
 function renderTab1(queryText,discMovies){
@@ -1150,13 +1258,106 @@ function renderTab1(queryText,discMovies){
 
 // ── Tab 1 events ──
 document.querySelectorAll('#mood-pills .mood-pill').forEach(p=>p.addEventListener('click',()=>{p.classList.toggle('on');if(p.classList.contains('on'))F.moods.add(p.dataset.mood);else F.moods.delete(p.dataset.mood);}));
-document.querySelectorAll('#runtime-pills .pill').forEach(p=>p.addEventListener('click',()=>{document.querySelectorAll('#runtime-pills .pill').forEach(x=>{x.classList.remove('on');F.runtimes.delete(x.dataset.rt);});p.classList.add('on');F.runtimes.add(p.dataset.rt);}));
+document.querySelectorAll('#runtime-pills .pill').forEach(p=>p.addEventListener('click',()=>{
+  const rt=p.dataset.rt;
+  if(rt==='any'){
+    document.querySelectorAll('#runtime-pills .pill').forEach(x=>x.classList.remove('on'));
+    F.runtimes.clear();p.classList.add('on');
+  } else {
+    const wasOn=p.classList.contains('on');
+    document.querySelectorAll('#runtime-pills .pill').forEach(x=>x.classList.remove('on'));
+    F.runtimes.clear();
+    if(!wasOn){p.classList.add('on');F.runtimes.add(rt);}
+    else document.querySelector('#runtime-pills .pill[data-rt="any"]').classList.add('on');
+  }
+}));
+
+// Collapse toggles
+document.querySelectorAll('.filter-collapse-hd').forEach(hd=>{
+  hd.addEventListener('click',()=>{
+    const key=hd.dataset.collapse;
+    const body=document.getElementById(`body-${key}`);
+    const arr=document.getElementById(`arr-${key}`);
+    if(body){body.classList.toggle('open');arr.classList.toggle('open');}
+  });
+});
+
+// Streaming filter
+document.querySelectorAll('#streaming-pills .pill').forEach(p=>p.addEventListener('click',()=>{
+  document.querySelectorAll('#streaming-pills .pill').forEach(x=>x.classList.remove('on'));
+  p.classList.add('on');F.streaming=p.dataset.stream;
+  document.getElementById('service-select-panel').style.display=F.streaming==='select'?'block':'none';
+}));
+
+// Populate service checkboxes
+(function(){
+  const container=document.getElementById('service-checkboxes');
+  if(!container)return;
+  Object.entries(SVC_META).forEach(([id,svc])=>{
+    const lbl=document.createElement('label');
+    lbl.className='service-check-row';
+    lbl.innerHTML=`<input type="checkbox" value="${id}" ${MY_SERVICES.has(+id)?'checked':''}><span class="service-check-label">${svc.name}</span>`;
+    container.appendChild(lbl);
+  });
+})();
+
+// IMDb slider
+const imdbSlider=document.getElementById('imdb-slider');
+const imdbValEl=document.getElementById('imdb-val');
+imdbSlider.addEventListener('input',()=>{
+  F.minImdb=+imdbSlider.value;
+  imdbValEl.textContent=F.minImdb===0?'Any':`${F.minImdb}+`;
+  const pct=(F.minImdb/10)*100;
+  imdbSlider.style.background=`linear-gradient(to right,#f59e0b ${pct}%,var(--border) ${pct}%)`;
+});
+
+// LB stars
+(function(){
+  const starsEl=document.getElementById('lb-stars');
+  if(!starsEl)return;
+  const starEls=[...starsEl.querySelectorAll('.lb-star')];
+  const lbValEl=document.getElementById('lb-val');
+  let dragging=false;
+  function ratingFromX(clientX){
+    const rect=starsEl.getBoundingClientRect();
+    const relX=Math.max(0,clientX-rect.left);
+    const raw=relX/rect.width*5;
+    return Math.min(5,Math.max(0,Math.round(raw*2)/2));
+  }
+  function applyRating(val){
+    F.minLb=val;
+    lbValEl.textContent=val===0?'Any':`${val}+`;
+    starEls.forEach((s,i)=>s.classList.toggle('filled',val>=i+1));
+  }
+  starsEl.addEventListener('mousedown',e=>{dragging=true;applyRating(ratingFromX(e.clientX));});
+  starsEl.addEventListener('mousemove',e=>{if(dragging)applyRating(ratingFromX(e.clientX));});
+  document.addEventListener('mouseup',()=>{dragging=false;});
+  starsEl.addEventListener('touchstart',e=>{dragging=true;applyRating(ratingFromX(e.touches[0].clientX));},{passive:true});
+  starsEl.addEventListener('touchmove',e=>{if(dragging){e.preventDefault();applyRating(ratingFromX(e.touches[0].clientX));}},{passive:false});
+  starsEl.addEventListener('touchend',()=>{dragging=false;});
+})();
+
+// Rewatch filter
+document.querySelectorAll('#rewatch-pills .pill').forEach(p=>p.addEventListener('click',()=>{
+  document.querySelectorAll('#rewatch-pills .pill').forEach(x=>x.classList.remove('on'));
+  p.classList.add('on');F.rewatch=p.dataset.rw;
+}));
 
 document.getElementById('clear-btn').addEventListener('click',()=>{
   document.querySelectorAll('#mood-pills .mood-pill').forEach(p=>{p.classList.remove('on');});
   F.moods.clear();
   document.querySelectorAll('#runtime-pills .pill').forEach(p=>{p.classList.remove('on');});
+  document.querySelector('#runtime-pills .pill[data-rt="any"]').classList.add('on');
   F.runtimes.clear();
+  F.streaming='my';F.minImdb=0;F.minLb=0;F.rewatch='all';
+  document.querySelectorAll('#streaming-pills .pill').forEach(p=>p.classList.remove('on'));
+  document.querySelector('#streaming-pills .pill[data-stream="my"]').classList.add('on');
+  document.getElementById('service-select-panel').style.display='none';
+  const isl=document.getElementById('imdb-slider');if(isl){isl.value=0;isl.style.background='';document.getElementById('imdb-val').textContent='Any';}
+  document.querySelectorAll('#lb-stars .lb-star').forEach(s=>s.classList.remove('filled'));
+  const lbv=document.getElementById('lb-val');if(lbv)lbv.textContent='Any';
+  document.querySelectorAll('#rewatch-pills .pill').forEach(p=>p.classList.remove('on'));
+  const rwAll=document.querySelector('#rewatch-pills .pill[data-rw="all"]');if(rwAll)rwAll.classList.add('on');
   document.getElementById('query-text').value='';
 });
 
