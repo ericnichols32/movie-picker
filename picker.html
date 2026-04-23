@@ -119,8 +119,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; back
   cursor: pointer; border: none; box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 .lb-stars { display: flex; gap: 8px; touch-action: none; cursor: pointer; padding: 4px 0; }
-.lb-star { font-size: 28px; color: var(--border); transition: color 0.1s; line-height: 1; user-select: none; }
+.lb-star { font-size: 28px; color: var(--border); transition: color 0.05s; line-height: 1; user-select: none; }
 .lb-star.filled { color: #00c030; }
+.lb-star.half { background: linear-gradient(to right, #00c030 50%, var(--border) 50%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .service-checkboxes { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .service-check-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .service-check-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
@@ -171,7 +172,7 @@ section { margin-bottom: 30px; }
   font-size: 11px; font-weight: 800; color: var(--muted); background: var(--panel); border-right: 1px solid var(--border);
 }
 .rec-poster-wrap { position: relative; flex-shrink: 0; align-self: stretch; }
-.rec-poster { width: 76px; height: 100%; min-height: 114px; object-fit: cover; display: block; background: var(--panel); }
+.rec-poster { width: 80px; height: 100%; min-height: 114px; object-fit: contain; display: block; background: var(--panel); }
 .rec-no-poster { width: 76px; height: 100%; min-height: 114px; background: var(--panel); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--muted); }
 .watchlist-tag {
   position: absolute; bottom: 5px; left: 5px; background: rgba(79,120,241,0.9); color: #fff;
@@ -426,7 +427,7 @@ section { margin-bottom: 30px; }
   .rec-card:hover { border-color: #3d4870; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
   .rec-rank { display: flex; }
   .rec-num { display: none; }
-  .rec-poster { width: 88px; }
+  .rec-poster { width: 92px; }
   .rec-no-poster { width: 88px; font-size: 28px; }
   .rec-info { padding: 13px 16px; }
   .rec-title { font-size: 15px; }
@@ -1326,14 +1327,20 @@ imdbSlider.addEventListener('input',()=>{
   }
   function applyRating(val){
     F.minLb=val;
-    lbValEl.textContent=val===0?'Any':`${val}+`;
-    starEls.forEach((s,i)=>s.classList.toggle('filled',val>=i+1));
+    lbValEl.textContent=val===0?'Any':`${val}★`;
+    starEls.forEach((s,i)=>{
+      s.classList.remove('filled','half');
+      if(val>=i+1)s.classList.add('filled');
+      else if(val>=i+0.5)s.classList.add('half');
+    });
   }
+  let rafId=null;
+  function scheduleRating(clientX){if(rafId)cancelAnimationFrame(rafId);rafId=requestAnimationFrame(()=>{applyRating(ratingFromX(clientX));rafId=null;});}
   starsEl.addEventListener('mousedown',e=>{dragging=true;applyRating(ratingFromX(e.clientX));});
-  starsEl.addEventListener('mousemove',e=>{if(dragging)applyRating(ratingFromX(e.clientX));});
+  starsEl.addEventListener('mousemove',e=>{if(dragging)scheduleRating(e.clientX);});
   document.addEventListener('mouseup',()=>{dragging=false;});
   starsEl.addEventListener('touchstart',e=>{dragging=true;applyRating(ratingFromX(e.touches[0].clientX));},{passive:true});
-  starsEl.addEventListener('touchmove',e=>{if(dragging){e.preventDefault();applyRating(ratingFromX(e.touches[0].clientX));}},{passive:false});
+  starsEl.addEventListener('touchmove',e=>{if(dragging){e.preventDefault();scheduleRating(e.touches[0].clientX);}},{passive:false});
   starsEl.addEventListener('touchend',()=>{dragging=false;});
 })();
 
@@ -1354,7 +1361,7 @@ document.getElementById('clear-btn').addEventListener('click',()=>{
   document.querySelector('#streaming-pills .pill[data-stream="my"]').classList.add('on');
   document.getElementById('service-select-panel').style.display='none';
   const isl=document.getElementById('imdb-slider');if(isl){isl.value=0;isl.style.background='';document.getElementById('imdb-val').textContent='Any';}
-  document.querySelectorAll('#lb-stars .lb-star').forEach(s=>s.classList.remove('filled'));
+  document.querySelectorAll('#lb-stars .lb-star').forEach(s=>s.classList.remove('filled','half'));
   const lbv=document.getElementById('lb-val');if(lbv)lbv.textContent='Any';
   document.querySelectorAll('#rewatch-pills .pill').forEach(p=>p.classList.remove('on'));
   const rwAll=document.querySelector('#rewatch-pills .pill[data-rw="all"]');if(rwAll)rwAll.classList.add('on');
